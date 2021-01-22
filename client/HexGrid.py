@@ -4,7 +4,29 @@ from cell import Cell
 class HexGrid:
 
     def __init__(self):
-        pass
+        self.grid = []
+
+    def solitaire_jump(self, jumper, jumpee):
+    #not sure how this will interact with the rest of the system but it is something
+
+        #check if neighbours
+        if self.grid[jumper[0]][jumper[1]] in self.grid[jumpee[0]][jumpee[1]].neighbours:
+
+            #calculate hole
+            y = jumper[0] - jumpee[0]
+            x = jumper[1] - jumpee[1]
+            hole = (jumpee[0] - y, jumpee[1] - x)
+
+            #if hole empty, perform jump
+            if self.grid[hole[0]][hole[1]].empty:
+                self.grid[jumper[0]][jumper[1]].empty = True
+                self.grid[jumpee[0]][jumpee[1]].empty = True
+                self.grid[hole[0]][hole[1]].empty = False
+                print(jumper, " jumped over ", jumpee, " to ", hole)
+            else:
+                print("not legal")
+        else:
+            print("not legal")
 
 
 class Diamond(HexGrid):
@@ -15,14 +37,14 @@ class Diamond(HexGrid):
 
 class Triangle(HexGrid):
 
-    def __init__(self, size):
+    def __init__(self, size, empties=[]):
         cells = []
         alphabet = "abcdefghijklmnopqrstuvwxyz" #alphabetical IDSsonly work for sizes up to 6
         ids = 0
         for i in range(size):
             row = []
             for j in range(0,i+1):
-                c = Cell(alphabet[ids], [], False)
+                c = Cell(alphabet[ids], [], ((i,j) in empties))
                 row.append(c)
                 ids += 1
             cells.append(row)
@@ -33,7 +55,7 @@ class Triangle(HexGrid):
         for r in self.grid:
             for x in r:
                 n = [c.cell_id for c in x.neighbours]
-                print(x.cell_id, "Neighbours: ", [c.cell_id for c in x.neighbours])
+                print(x.cell_id, x.empty,  "Neighbours: ", [c.cell_id for c in x.neighbours])
     
     def initialize_neighbours(self):
         #pattern = [(0, 1),(1, 1),(1, 0),(0, -1),(-1, -1),(-1, 0)]
@@ -69,11 +91,12 @@ class Triangle(HexGrid):
                     print("woops")
 
 
-
 def example_use_of_triangle():
-    size = 4
-
-    t = Triangle(size)
+    size = 5
+    t = Triangle(size, [(4,2)])
     t.initialize_neighbours()
     t.vis()
+    t.solitaire_jump((1,1),(3,1))
+    t.vis()
 
+example_use_of_triangle()
