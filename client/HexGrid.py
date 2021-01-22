@@ -4,6 +4,7 @@ from cell import Cell
 class HexGrid:
 
     def __init__(self):
+
         self.grid = []
 
     def solitaire_jump(self, jumper, jumpee):
@@ -29,6 +30,8 @@ class HexGrid:
             print("not legal")
 
 
+
+
 class Diamond(HexGrid):
 
     def __init__(self):
@@ -37,14 +40,19 @@ class Diamond(HexGrid):
 
 class Triangle(HexGrid):
 
+
     def __init__(self, size, empties=[]):
+
         cells = []
         alphabet = "abcdefghijklmnopqrstuvwxyz" #alphabetical IDSsonly work for sizes up to 6
         ids = 0
         for i in range(size):
             row = []
             for j in range(0,i+1):
+
                 c = Cell(alphabet[ids], [], ((i,j) in empties))
+
+
                 row.append(c)
                 ids += 1
             cells.append(row)
@@ -55,7 +63,9 @@ class Triangle(HexGrid):
         for r in self.grid:
             for x in r:
                 n = [c.cell_id for c in x.neighbours]
+
                 print(x.cell_id, x.empty,  "Neighbours: ", [c.cell_id for c in x.neighbours])
+
     
     def initialize_neighbours(self):
         #pattern = [(0, 1),(1, 1),(1, 0),(0, -1),(-1, -1),(-1, 0)]
@@ -100,3 +110,4 @@ def example_use_of_triangle():
     t.vis()
 
 example_use_of_triangle()
+
