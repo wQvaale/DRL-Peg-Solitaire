@@ -4,6 +4,7 @@ from cell import Cell
 class HexGrid:
 
     def __init__(self):
+
         self.grid = []
         self.holes = []
         self.size
@@ -36,6 +37,8 @@ class HexGrid:
             print("not legal")
 
 
+
+
 class Diamond(HexGrid):
 
     def __init__(self):
@@ -44,7 +47,9 @@ class Diamond(HexGrid):
 
 class Triangle(HexGrid):
 
+
     def __init__(self, size, empties=[]):
+
         cells = []
         self.holes = []
         alphabet = "abcdefghijklmnopqrstuvwxyz" #alphabetical IDSsonly work for sizes up to 6
@@ -57,6 +62,7 @@ class Triangle(HexGrid):
                 if (i,j) in empties:
                     c.empty = True
                     self.holes.append(c)
+
                 row.append(c)
                 ids += 1
             cells.append(row)
@@ -70,7 +76,9 @@ class Triangle(HexGrid):
         for r in self.grid:
             for x in r:
                 n = [c.cell_id for c in x.neighbours]
+
                 print(x.cell_id, x.empty,  "Neighbours: ", [c.cell_id for c in x.neighbours])
+
     
     def initialize_neighbours(self):
         #pattern = [(0, 1),(1, 1),(1, 0),(0, -1),(-1, -1),(-1, 0)]
@@ -114,4 +122,4 @@ def example_use_of_triangle():
     t.solitaire_jump((1,1),(3,1))
     t.vis()
 
-#example_use_of_triangle()
+
