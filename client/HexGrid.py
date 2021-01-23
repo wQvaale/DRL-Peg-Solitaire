@@ -5,24 +5,31 @@ class HexGrid:
 
     def __init__(self):
         self.grid = []
+        self.holes = []
+        self.size
+
 
     def solitaire_jump(self, jumper, jumpee):
     #not sure how this will interact with the rest of the system but it is something
-
         #check if neighbours
-        if self.grid[jumper[0]][jumper[1]] in self.grid[jumpee[0]][jumpee[1]].neighbours:
-
+        if jumper in jumpee.neighbours:
             #calculate hole
-            y = jumper[0] - jumpee[0]
-            x = jumper[1] - jumpee[1]
-            hole = (jumpee[0] - y, jumpee[1] - x)
-
-            #if hole empty, perform jump
-            if self.grid[hole[0]][hole[1]].empty:
-                self.grid[jumper[0]][jumper[1]].empty = True
-                self.grid[jumpee[0]][jumpee[1]].empty = True
-                self.grid[hole[0]][hole[1]].empty = False
-                print(jumper, " jumped over ", jumpee, " to ", hole)
+            y = jumper.y - jumpee.y
+            x = jumper.x - jumpee.x
+            #if calculated hole exists
+            if 0 < jumpee.y - y < self.size and 0 < jumpee.x - x < self.size:
+                hole = self.grid[jumpee.y - y][ jumpee.x - x]
+                #if hole empty, perform jump
+                if hole.empty and not jumper.empty and not jumpee.empty:
+                    jumper.empty = True
+                    jumpee.empty = True
+                    hole.empty = False
+                    self.holes.remove(hole)
+                    self.holes.append(jumper)
+                    self.holes.append(jumpee)
+                    print(jumper, " jumped over ", jumpee, " to ", hole)
+                else:
+                    print("not legal")
             else:
                 print("not legal")
         else:
@@ -39,17 +46,25 @@ class Triangle(HexGrid):
 
     def __init__(self, size, empties=[]):
         cells = []
+        self.holes = []
         alphabet = "abcdefghijklmnopqrstuvwxyz" #alphabetical IDSsonly work for sizes up to 6
         ids = 0
+        self.size = size
         for i in range(size):
             row = []
             for j in range(0,i+1):
-                c = Cell(alphabet[ids], [], ((i,j) in empties))
+                c = Cell(j,i,alphabet[ids], [], False)
+                if (i,j) in empties:
+                    c.empty = True
+                    self.holes.append(c)
                 row.append(c)
                 ids += 1
             cells.append(row)
 
+
         self.grid = cells
+        self.initialize_neighbours()
+
 
     def vis(self):
         for r in self.grid:
@@ -92,11 +107,11 @@ class Triangle(HexGrid):
 
 
 def example_use_of_triangle():
-    size = 5
-    t = Triangle(size, [(4,2)])
+    size = 4
+    t = Triangle(size, [(3,2)])
     t.initialize_neighbours()
     t.vis()
     t.solitaire_jump((1,1),(3,1))
     t.vis()
 
-example_use_of_triangle()
+#example_use_of_triangle()
