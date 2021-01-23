@@ -18,7 +18,7 @@ class HexGrid:
             y = jumper.y - jumpee.y
             x = jumper.x - jumpee.x
             #if calculated hole exists
-            if 0 < jumpee.y - y < self.size and 0 < jumpee.x - x < self.size:
+            if 0 <= jumpee.y - y <= self.size and 0 <= jumpee.x - x <= self.size:
                 hole = self.grid[jumpee.y - y][ jumpee.x - x]
                 #if hole empty, perform jump
                 if hole.empty and not jumper.empty and not jumpee.empty:

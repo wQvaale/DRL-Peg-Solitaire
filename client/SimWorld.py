@@ -49,3 +49,5 @@ class SimWorld:
                 print("u suck")
                 break
 
+s = SimWorld()
+s.play_solitaire_human_terminal()
