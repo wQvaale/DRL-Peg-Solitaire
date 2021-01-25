@@ -23,6 +23,32 @@ class SimWorld:
         num_cells = self.board.size*(self.board.size+1)/2
         if len(self.board.holes) == num_cells - 1:
             return True
+    
+    def solitaire_jump(self, jumper, jumpee):
+        #not sure how this will interact with the rest of the system but it is something
+            #check if neighbours
+            if jumper in jumpee.neighbours:
+                #calculate hole
+                y = jumper.y - jumpee.y
+                x = jumper.x - jumpee.x
+                #if calculated hole exists
+                if 0 <= jumpee.y - y <= self.board.size and 0 <= jumpee.x - x <= self.board.size:
+                    hole = self.board.grid[jumpee.y - y][ jumpee.x - x]
+                    #if hole empty, perform jump
+                    if hole.empty and not jumper.empty and not jumpee.empty:
+                        jumper.empty = True
+                        jumpee.empty = True
+                        hole.empty = False
+                        self.board.holes.remove(hole)
+                        self.board.holes.append(jumper)
+                        self.board.holes.append(jumpee)
+                        print(jumper, " jumped over ", jumpee, " to ", hole)
+                    else:
+                        print("not legal")
+                else:
+                    print("not legal")
+            else:
+                print("not legal")
 
     def play_solitaire_human_terminal(self):
         self.board.vis()
@@ -39,7 +65,7 @@ class SimWorld:
                         jumper = self.board.grid[row][col]
                     if self.board.grid[row][col].cell_id == jumpee:
                         jumpee = self.board.grid[row][col]
-            self.board.solitaire_jump(jumper, jumpee)
+            self.solitaire_jump(jumper, jumpee)
             self.board.vis()
             
             if self.is_victory():
@@ -48,6 +74,8 @@ class SimWorld:
             elif not self.are_there_legal_moves():
                 print("u suck")
                 break
+    
+    
 
 s = SimWorld()
 s.play_solitaire_human_terminal()

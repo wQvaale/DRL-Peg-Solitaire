@@ -9,36 +9,6 @@ class HexGrid:
         self.holes = []
         self.size
 
-
-    def solitaire_jump(self, jumper, jumpee):
-    #not sure how this will interact with the rest of the system but it is something
-        #check if neighbours
-        if jumper in jumpee.neighbours:
-            #calculate hole
-            y = jumper.y - jumpee.y
-            x = jumper.x - jumpee.x
-            #if calculated hole exists
-            if 0 <= jumpee.y - y <= self.size and 0 <= jumpee.x - x <= self.size:
-                hole = self.grid[jumpee.y - y][ jumpee.x - x]
-                #if hole empty, perform jump
-                if hole.empty and not jumper.empty and not jumpee.empty:
-                    jumper.empty = True
-                    jumpee.empty = True
-                    hole.empty = False
-                    self.holes.remove(hole)
-                    self.holes.append(jumper)
-                    self.holes.append(jumpee)
-                    print(jumper, " jumped over ", jumpee, " to ", hole)
-                else:
-                    print("not legal")
-            else:
-                print("not legal")
-        else:
-            print("not legal")
-
-
-
-
 class Diamond(HexGrid):
 
     def __init__(self):
