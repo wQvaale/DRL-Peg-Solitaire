@@ -30,6 +30,14 @@ class HexGrid:
             print("not legal")
 
 
+    def get_neighbours(self):
+        neighbours = []
+        for r in self.grid:
+            for x in r:
+                neighbours.append([c.cell_id for c in x.neighbours])
+        return neighbours
+
+
 
 
 class Diamond(HexGrid):
@@ -62,8 +70,6 @@ class Triangle(HexGrid):
     def vis(self):
         for r in self.grid:
             for x in r:
-                n = [c.cell_id for c in x.neighbours]
-
                 print(x.cell_id, x.empty,  "Neighbours: ", [c.cell_id for c in x.neighbours])
 
     
@@ -104,10 +110,9 @@ class Triangle(HexGrid):
 def example_use_of_triangle():
     size = 5
     t = Triangle(size, [(4,2)])
+    t.vis()
     t.initialize_neighbours()
     t.vis()
     t.solitaire_jump((1,1),(3,1))
     t.vis()
-
-example_use_of_triangle()
 
