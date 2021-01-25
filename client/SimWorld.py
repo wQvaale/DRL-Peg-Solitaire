@@ -3,7 +3,7 @@ from randomAgent import RandomAgent
 
 class SimWorld:
 
-    def __init__(self, shape="Triangle", size=4, holes=[(0,0)]):
+    def __init__(self, shape="Triangle", size=4, holes=[(1,1)]):
         if shape == "Triangle":
             self.board = Triangle(size, holes)
 
@@ -55,8 +55,11 @@ class SimWorld:
         A = RandomAgent()
         self.board.vis()
         while True:
+
+            #gets cell IDs from agent
             jumper, jumpee = A.getMove(self.board)
 
+            #finds corresponding cells for the IDs
             for row in range(len(self.board.grid)):
                 for col in range(row+1):
                     if self.board.grid[row][col].cell_id == jumper:
@@ -64,6 +67,7 @@ class SimWorld:
                     if self.board.grid[row][col].cell_id == jumpee:
                         jumpee = self.board.grid[row][col]
 
+            #plays move
             self.solitaire_jump(jumper, jumpee)
             self.board.vis()
             
