@@ -22,13 +22,13 @@ class Triangle(HexGrid):
 
         cells = []
         self.holes = []
-        alphabet = "abcdefghijklmnopqrstuvwxyz" #alphabetical IDSsonly work for sizes up to 6
+        #alphabet = "abcdefghijklmnopqrstuvwxyz" #alphabetical IDSsonly work for sizes up to 6
         ids = 0
         self.size = size
         for i in range(size):
             row = []
             for j in range(0,i+1):
-                c = Cell(j,i,alphabet[ids], [], False)
+                c = Cell(j,i, ids, [], False)
                 if (i,j) in empties:
                     c.empty = True
                     self.holes.append(c)

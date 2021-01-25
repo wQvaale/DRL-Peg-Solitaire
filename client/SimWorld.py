@@ -1,4 +1,5 @@
 from HexGrid import Triangle
+from randomAgent import RandomAgent
 
 class SimWorld:
 
@@ -31,8 +32,8 @@ class SimWorld:
                 #calculate hole
                 y = jumper.y - jumpee.y
                 x = jumper.x - jumpee.x
-                #if calculated hole exists
-                if 0 <= jumpee.y - y <= self.board.size and 0 <= jumpee.x - x <= self.board.size:
+                #if calculated hole exists - > is within the boundaries of the triangle
+                if 0 <= jumpee.y - y < self.board.size and 0 <= jumpee.x - x <= jumpee.y - y:
                     hole = self.board.grid[jumpee.y - y][ jumpee.x - x]
                     #if hole empty, perform jump
                     if hole.empty and not jumper.empty and not jumpee.empty:
@@ -50,13 +51,37 @@ class SimWorld:
             else:
                 print("not legal")
 
+    def play_solitaire_random_agent(self):
+        A = RandomAgent()
+        self.board.vis()
+        while True:
+            jumper, jumpee = A.getMove(self.board)
+
+            for row in range(len(self.board.grid)):
+                for col in range(row+1):
+                    if self.board.grid[row][col].cell_id == jumper:
+                        jumper = self.board.grid[row][col]
+                    if self.board.grid[row][col].cell_id == jumpee:
+                        jumpee = self.board.grid[row][col]
+
+            self.solitaire_jump(jumper, jumpee)
+            self.board.vis()
+            
+            if self.is_victory():
+                print("congrats")
+                break
+            elif not self.are_there_legal_moves():
+                print("u suck")
+                break
+
+
     def play_solitaire_human_terminal(self):
         self.board.vis()
         while True:
          
             inp = input("move")
-            jumper = inp[0]
-            jumpee = inp[1]
+            jumper = int(inp[0])
+            jumpee = int(inp[1])
 
             for row in range(len(self.board.grid)):
                 for col in range(row+1):
@@ -74,8 +99,10 @@ class SimWorld:
             elif not self.are_there_legal_moves():
                 print("u suck")
                 break
+        
+
     
     
 
 s = SimWorld()
-s.play_solitaire_human_terminal()
+s.play_solitaire_random_agent()

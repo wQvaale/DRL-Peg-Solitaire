@@ -9,5 +9,5 @@ class Cell:
 
         
     def __str__(self):
-        return self.cell_id
+        return str(self.cell_id)
         
