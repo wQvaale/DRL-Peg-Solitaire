@@ -1,37 +1,42 @@
 import networkx as nx
 import matplotlib.pyplot as plt
-from networkx.drawing.nx_agraph import graphviz_layout, to_agraph
-import pygraphviz as pgv
 from HexGrid import *
 
-size = 5
-t = Triangle(size, [(4,2)])
-t.initialize_neighbours()
+def init_graph():
+    return nx.Graph()
 
-def initialise_graph(hexgrid):
-    G = nx.Graph()
-    alphabet = "abcdefghijklmnopqrstuvwxyz"
-    neighbours = hexgrid.get_neighbours()
+def add_nodes(G, grid):
 
     """Add nodes to graph"""
-    for i in range(len(t.grid)):
-        for j in range(len(t.grid[i])):
-            G.add_node(t.grid[i][j].__str__())
+
+    for i in range(len(grid.grid)):
+        for j in range(len(grid.grid[i])):
+            G.add_node(grid.grid[i][j].__str__())
+    return G
+
+def add_edges(G, grid):
+
+    alphabet = "abcdefghijklmnopqrstuvwxyz"
+    neighbours = grid.get_neighbours()
 
     """Add edges to graph"""
+
     for i in range(len(neighbours)):
         node_edges = []
         for j in range(len(neighbours[i])):
             node_edges.append((alphabet[i], neighbours[i][j]))
         G.add_edges_from(node_edges)
-
     return G
 
-G = initialise_graph(t)
+t = Triangle(5, [(4,2)])
+t.initialize_neighbours()
+
+G = init_graph()
+G = add_nodes(G, t)
+G = add_edges(G, t)
 
 print(G.nodes())
 print(G.edges())
-
 
 nx.draw(G)
 plt.show()
