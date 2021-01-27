@@ -2,18 +2,18 @@ import networkx as nx
 import matplotlib.pyplot as plt
 from HexGrid import *
 
-def init_graph(shape):
+def init_graph(hxgrid):
 
     G = nx.Graph()
 
     """Add nodes to graph"""
-    for i in range(len(shape.grid)):
-        for j in range(len(shape.grid[i])):
-            G.add_node(int(shape.grid[i][j].__str__()))
+    for i in range(len(hxgrid.grid)):
+        for j in range(len(hxgrid.grid[i])):
+            G.add_node(int(hxgrid.grid[i][j].__str__()))
 
     """Add edges to graph"""
 
-    neighbours = shape.get_neighbours()
+    neighbours = hxgrid.get_neighbours()
 
     for i in range(len(neighbours)):
         for j in range(len(neighbours[i])):
@@ -21,14 +21,21 @@ def init_graph(shape):
     
     return G
 
+def find_positions(hxgrid):
+    cell_pos = hxgrid.get_positions()
+    nx_pos = {}
+    for i in range(len(cell_pos)):
+        nx_pos[i] = cell_pos[i]
+    return nx_pos
+
+
+
 t = Triangle(5, [(4,2)])
 
 G = init_graph(t)
+pos = find_positions(t)
 
-print(G.nodes())
-print(G.edges())
-
-nx.draw(G)
+nx.draw(G, pos, with_labels=True)
 plt.show()
 
 

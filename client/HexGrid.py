@@ -15,6 +15,13 @@ class HexGrid:
                 neighbours.append([c.cell_id for c in x.neighbours])
         return neighbours
 
+    def get_positions(self):
+        positions = []
+        for row in self.grid:
+            for cell in row:
+                positions.append(cell.getPos())
+        return positions
+
 class Diamond(HexGrid):
 
     def __init__(self):
@@ -33,7 +40,7 @@ class Triangle(HexGrid):
         for i in range(size):
             row = []
             for j in range(0,i+1):
-                c = Cell(j,i, ids, [], False)
+                c = Cell(j, size-i, ids, [], False)
                 if (i,j) in empties:
                     c.empty = True
                     self.holes.append(c)
@@ -89,3 +96,6 @@ class Triangle(HexGrid):
 def example_use_of_triangle():
     size = 5
     t = Triangle(size, [(4,2)])
+    print(t.get_positions())
+
+example_use_of_triangle()
