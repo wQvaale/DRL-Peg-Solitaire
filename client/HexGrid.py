@@ -6,29 +6,8 @@ class HexGrid:
     def __init__(self):
 
         self.grid = []
-
-    def solitaire_jump(self, jumper, jumpee):
-    #not sure how this will interact with the rest of the system but it is something
-
-        #check if neighbours
-        if self.grid[jumper[0]][jumper[1]] in self.grid[jumpee[0]][jumpee[1]].neighbours:
-
-            #calculate hole
-            y = jumper[0] - jumpee[0]
-            x = jumper[1] - jumpee[1]
-            hole = (jumpee[0] - y, jumpee[1] - x)
-
-            #if hole empty, perform jump
-            if self.grid[hole[0]][hole[1]].empty:
-                self.grid[jumper[0]][jumper[1]].empty = True
-                self.grid[jumpee[0]][jumpee[1]].empty = True
-                self.grid[hole[0]][hole[1]].empty = False
-                print(jumper, " jumped over ", jumpee, " to ", hole)
-            else:
-                print("not legal")
-        else:
-            print("not legal")
-
+        self.holes = []
+        self.size
 
     def get_neighbours(self):
         neighbours = []
