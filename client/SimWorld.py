@@ -18,7 +18,21 @@ class SimWorld:
                         if hole.empty and not jumper.empty and not jumpee.empty:
                             return True
         return False
-             
+
+    def get_all_legal_moves(self):
+        moves = []
+        for hole in self.board.holes:
+            for jumpee in hole.neighbours:
+                for jumper in jumpee.neighbours:
+                    y = jumper.y - jumpee.y
+                    x = jumper.x - jumpee.x
+                    if hole.y == jumpee.y - y and hole.x == jumpee.x - x:
+                        #if hole empty, perform jump
+                        if hole.empty and not jumper.empty and not jumpee.empty:
+                            moves.append((jumper, jumpee))
+        return moves
+
+
 
     def is_victory(self):
         num_cells = self.board.size*(self.board.size+1)/2
@@ -55,10 +69,8 @@ class SimWorld:
         A = RandomAgent()
         self.board.vis()
         while True:
-
             #gets cell IDs from agent
             jumper, jumpee = A.getMove(self.board)
-
             #finds corresponding cells for the IDs
             for row in range(len(self.board.grid)):
                 for col in range(row+1):
