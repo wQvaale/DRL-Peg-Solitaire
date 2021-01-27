@@ -52,20 +52,25 @@ class Triangle(HexGrid):
     def __init__(self, size, empties=[]):
 
         cells = []
-        alphabet = "abcdefghijklmnopqrstuvwxyz" #alphabetical IDSsonly work for sizes up to 6
+        self.holes = []
+        #alphabet = "abcdefghijklmnopqrstuvwxyz" #alphabetical IDSsonly work for sizes up to 6
         ids = 0
+        self.size = size
         for i in range(size):
             row = []
             for j in range(0,i+1):
-
-                c = Cell(alphabet[ids], [], ((i,j) in empties))
-
+                c = Cell(j,i, ids, [], False)
+                if (i,j) in empties:
+                    c.empty = True
+                    self.holes.append(c)
 
                 row.append(c)
                 ids += 1
             cells.append(row)
 
+
         self.grid = cells
+        self.initialize_neighbours()
 
     def vis(self):
         for r in self.grid:
