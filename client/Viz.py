@@ -2,38 +2,28 @@ import networkx as nx
 import matplotlib.pyplot as plt
 from HexGrid import *
 
-def init_graph():
-    return nx.Graph()
+def init_graph(shape):
 
-def add_nodes(G, grid):
+    G = nx.Graph()
 
     """Add nodes to graph"""
-
-    for i in range(len(grid.grid)):
-        for j in range(len(grid.grid[i])):
-            G.add_node(grid.grid[i][j].__str__())
-    return G
-
-def add_edges(G, grid):
-
-    alphabet = "abcdefghijklmnopqrstuvwxyz"
-    neighbours = grid.get_neighbours()
+    for i in range(len(shape.grid)):
+        for j in range(len(shape.grid[i])):
+            G.add_node(int(shape.grid[i][j].__str__()))
 
     """Add edges to graph"""
 
+    neighbours = shape.get_neighbours()
+
     for i in range(len(neighbours)):
-        node_edges = []
         for j in range(len(neighbours[i])):
-            node_edges.append((alphabet[i], neighbours[i][j]))
-        G.add_edges_from(node_edges)
+            G.add_edge(i, neighbours[i][j])
+    
     return G
 
 t = Triangle(5, [(4,2)])
-t.initialize_neighbours()
 
-G = init_graph()
-G = add_nodes(G, t)
-G = add_edges(G, t)
+G = init_graph(t)
 
 print(G.nodes())
 print(G.edges())
