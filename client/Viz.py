@@ -2,6 +2,7 @@ import networkx as nx
 import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
 from HexGrid import *
+from cell import Cell
 
 def init_graph(hxgrid):
 
@@ -10,7 +11,7 @@ def init_graph(hxgrid):
     """Add nodes to graph"""
     for i in range(len(hxgrid.grid)):
         for j in range(len(hxgrid.grid[i])):
-            G.add_node(int(hxgrid.grid[i][j].__str__()))
+            G.add_node(int(hxgrid.grid[i][j].getCellId()))
 
     """Add edges to graph"""
 
@@ -22,66 +23,77 @@ def init_graph(hxgrid):
 
     return G
 
-def find_node_positions(hxgrid):
-    cell_pos = hxgrid.get_positions()
+def find_node_positions(shape, size):
+
+    """ Finds the node positions based on shape and size """
+
+    cell_pos = []
+    if shape == Triangle:
+        for i in range(size):
+            for j in range(i+1):
+                cell_pos.append((j, size-i-1))
+
     nx_pos = {}
     for i in range(len(cell_pos)):
         nx_pos[i] = cell_pos[i]
     return nx_pos
 
-def find_init_node_colours(hxgrid):
-    colour_map = []
-    for row in hxgrid.grid:
-        for cell in row:
-            if cell.empty:
-                colour_map.append('lightgrey')
-            else:
-                colour_map.append('skyblue')
-    return colour_map
+def find_node_colours(grid, jumper=None, gets_jumped=None):
 
-def find_node_colours(hex_tup):
+    """ Finds colours for a frame in video based on current state of grid """
+
     colour_map = []
-    for row in hxgrid.grid:
+    for row in grid:
         for cell in row:
-            if cell.empty:
-                colour_map.append('lightgrey')
+            if jumper == None and gets_jumped == None:
+                if cell.empty:
+                    colour_map.append('lightgrey')
+                else: 
+                    colour_map.append('black')
             else:
-                colour_map.append('skyblue')
+                if cell.x == jumper.x and cell.y == jumper.y:
+                    colour_map.append('green')
+                elif cell.x == gets_jumped.x and cell.y == gets_jumped.y:
+                    colour_map.append('red')
+                elif cell.empty:
+                    colour_map.append('lightgrey')
+                else: 
+                    colour_map.append('black')
+
     return colour_map
 
 class Viz:
 
     def __init__(self, hxgrid):
-        self.fig, self.ax = plt.subplots()
-        self.frames = 1
-        self.hexgrid = hxgrid
-        self.G = init_graph(hxgrid)
-        self.pos = find_node_positions(hxgrid)
-        self.init_node_col = find_init_node_colours(hxgrid)
-        nx.draw(self.G, pos=self.pos, node_color=self.init_node_col)
-        self.board_states = []
 
-    def steps(self, hxgrid, jumper, gets_jumped):
+        """ Config for viz """
+        self.fig, self.ax = plt.subplots()
+
+        """ Initialise Graph for viz """
+        self.G = init_graph(hxgrid)
+        self.pos = find_node_positions(type(hxgrid), hxgrid.size)
+
+        """ Frames and all their corresponding HexGrid states """
+        self.frames = 1
+        self.grid_states = []
+        self.grid_states.append((hxgrid.grid, None, None))
+
+    def steps(self, hxgrid, jumper=None, gets_jumped=None):
+
+        """ Save frame of action made by solver """
         self.frames += 1
-        self.board_states.append((hxgrid, jumper, gets_jumped))
+        self.grid_states.append((hxgrid.grid, jumper, gets_jumped))
 
     def update(self, i):
-        col = find_node_colours(self.board_states[i])
+
+        """ Function that is used in FuncAnimation iteration """
+        col = find_node_colours(self.grid_states[i][0], self.grid_states[i][1], self.grid_states[i][2])
         return nx.draw(self.G, pos=self.pos, node_color=col)
 
-
     def viz(self):
+
+        """ Last step of visualising. Takes a figure and and update function to create video. """
+
         animation = FuncAnimation(self.fig, func=self.update, frames=self.frames, interval=200)
         plt.show()
-
-t = Triangle(5, [(4,2)])
-v = Viz(t)
-for i in range(len(t.grid)):
-    v.steps()
-v.viz()
-
-
-
-
-
 

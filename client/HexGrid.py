@@ -10,18 +10,13 @@ class HexGrid:
         self.size
 
     def get_neighbours(self):
+
+        """ Returns list of cell neighbours"""
         neighbours = []
         for r in self.grid:
             for x in r:
                 neighbours.append([c.cell_id for c in x.neighbours])
         return neighbours
-
-    def get_positions(self):
-        positions = []
-        for row in self.grid:
-            for cell in row:
-                positions.append(cell.getPos())
-        return positions
 
 
 class Diamond(HexGrid):
@@ -98,6 +93,6 @@ class Triangle(HexGrid):
 def example_use_of_triangle():
     size = 5
     t = Triangle(size, [(4,2)])
-    print(t.get_positions())
 
-example_use_of_triangle()
+
+

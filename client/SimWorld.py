@@ -1,11 +1,13 @@
 from HexGrid import Triangle
 from randomAgent import RandomAgent
+from Viz import Viz
 
 class SimWorld:
 
     def __init__(self, shape="Triangle", size=4, holes=[(1,1)]):
         if shape == "Triangle":
             self.board = Triangle(size, holes)
+            self.viz = Viz(self.board)
 
     def are_there_legal_moves(self):
         for hole in self.board.holes:
@@ -42,6 +44,7 @@ class SimWorld:
     def solitaire_jump(self, jumper, jumpee):
         #not sure how this will interact with the rest of the system but it is something
             #check if neighbours
+            self.viz.steps(self.board, jumper, jumpee)
             if jumper in jumpee.neighbours:
                 #calculate hole
                 y = jumper.y - jumpee.y
@@ -54,10 +57,11 @@ class SimWorld:
                         jumper.empty = True
                         jumpee.empty = True
                         hole.empty = False
-                        self.board.holes.remove(hole)
+                        self.board.holes.remove(hole)   
                         self.board.holes.append(jumper)
                         self.board.holes.append(jumpee)
-                        print(jumper, " jumped over ", jumpee, " to ", hole)
+                        self.viz.steps(self.board, jumper, jumpee)
+                        print(jumper.getCellId(), " jumped over ", jumpee.getCellId(), " to ", hole.getCellId())
                     else:
                         print("not legal")
                 else:
@@ -67,7 +71,7 @@ class SimWorld:
 
     def play_solitaire_random_agent(self):
         A = RandomAgent()
-        self.board.vis()
+        #self.board.vis()
         while True:
 
         
@@ -83,13 +87,15 @@ class SimWorld:
 
             #plays move
             self.solitaire_jump(jumper, jumpee)
-            self.board.vis()
+            #self.board.vis()
             
             if self.is_victory():
                 print("congrats")
+                self.viz.viz()
                 break
             elif not self.are_there_legal_moves():
                 print("u suck")
+                self.viz.viz()
                 break
 
 
