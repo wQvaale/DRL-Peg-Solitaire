@@ -29,7 +29,17 @@ def find_node_positions(hxgrid):
         nx_pos[i] = cell_pos[i]
     return nx_pos
 
-def find_node_colours(hxgrid):
+def find_init_node_colours(hxgrid):
+    colour_map = []
+    for row in hxgrid.grid:
+        for cell in row:
+            if cell.empty:
+                colour_map.append('lightgrey')
+            else:
+                colour_map.append('skyblue')
+    return colour_map
+
+def find_node_colours(hex_tup):
     colour_map = []
     for row in hxgrid.grid:
         for cell in row:
@@ -47,14 +57,16 @@ class Viz:
         self.hexgrid = hxgrid
         self.G = init_graph(hxgrid)
         self.pos = find_node_positions(hxgrid)
-        self.init_node_col = find_node_colours(hxgrid)
+        self.init_node_col = find_init_node_colours(hxgrid)
         nx.draw(self.G, pos=self.pos, node_color=self.init_node_col)
+        self.board_states = []
 
-    def steps(self):
+    def steps(self, hxgrid, jumper, gets_jumped):
         self.frames += 1
+        self.board_states.append((hxgrid, jumper, gets_jumped))
 
     def update(self, i):
-        col = find_node_colours(self.hexgrid)
+        col = find_node_colours(self.board_states[i])
         return nx.draw(self.G, pos=self.pos, node_color=col)
 
 

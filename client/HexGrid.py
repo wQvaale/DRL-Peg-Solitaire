@@ -42,7 +42,7 @@ class Triangle(HexGrid):
         for i in range(size):
             row = []
             for j in range(0,i+1):
-                c = Cell(j, size-i, ids, [], False)
+                c = Cell(j, i, ids, [], False)
                 if (i,j) in empties:
                     c.empty = True
                     self.holes.append(c)
