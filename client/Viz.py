@@ -9,6 +9,7 @@ def init_graph(hxgrid):
     G = nx.Graph()
 
     """Add nodes to graph"""
+    
     for i in range(len(hxgrid.grid)):
         for j in range(len(hxgrid.grid[i])):
             G.add_node(int(hxgrid.grid[i][j].getCellId()))
