@@ -7,6 +7,7 @@ class HexGrid:
 
         self.grid = []
         self.holes = []
+        self.size
 
     def get_neighbours(self):
         neighbours = []
@@ -21,6 +22,7 @@ class HexGrid:
             for cell in row:
                 positions.append(cell.getPos())
         return positions
+
 
 class Diamond(HexGrid):
 
