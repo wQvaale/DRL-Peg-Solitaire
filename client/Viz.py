@@ -9,7 +9,7 @@ def init_graph(hxgrid):
     G = nx.Graph()
 
     """Add nodes to graph"""
-    
+
     for i in range(len(hxgrid.grid)):
         for j in range(len(hxgrid.grid[i])):
             G.add_node(int(hxgrid.grid[i][j].getCellId()))
@@ -79,7 +79,7 @@ class Viz:
         self.grid_states = []
         self.grid_states.append((hxgrid.grid, None, None))
 
-    def steps(self, hxgrid, jumper=None, gets_jumped=None):
+    def step(self, hxgrid, jumper=None, gets_jumped=None):
 
         """ Save frame of action made by solver """
         self.frames += 1

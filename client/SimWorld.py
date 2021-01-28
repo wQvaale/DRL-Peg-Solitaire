@@ -44,7 +44,7 @@ class SimWorld:
     def solitaire_jump(self, jumper, jumpee):
         #not sure how this will interact with the rest of the system but it is something
             #check if neighbours
-            self.viz.steps(self.board, jumper, jumpee)
+            self.viz.step(self.board, jumper, jumpee)
             if jumper in jumpee.neighbours:
                 #calculate hole
                 y = jumper.y - jumpee.y
@@ -60,7 +60,7 @@ class SimWorld:
                         self.board.holes.remove(hole)   
                         self.board.holes.append(jumper)
                         self.board.holes.append(jumpee)
-                        self.viz.steps(self.board, jumper, jumpee)
+                        self.viz.step(self.board, jumper, jumpee)
                         print(jumper.getCellId(), " jumped over ", jumpee.getCellId(), " to ", hole.getCellId())
                     else:
                         print("not legal")
@@ -124,9 +124,6 @@ class SimWorld:
             elif not self.are_there_legal_moves():
                 print("u suck")
                 break
-        
-
-    
     
 
 s = SimWorld()
