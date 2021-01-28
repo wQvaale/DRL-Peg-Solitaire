@@ -69,8 +69,10 @@ class SimWorld:
         A = RandomAgent()
         self.board.vis()
         while True:
+
+        
             #gets cell IDs from agent
-            jumper, jumpee = A.getMove(self.board)
+            jumper, jumpee = A.getMove(self.get_all_legal_moves())
             #finds corresponding cells for the IDs
             for row in range(len(self.board.grid)):
                 for col in range(row+1):
@@ -98,6 +100,7 @@ class SimWorld:
             inp = input("move")
             jumper = int(inp[0])
             jumpee = int(inp[1])
+        
 
             for row in range(len(self.board.grid)):
                 for col in range(row+1):
