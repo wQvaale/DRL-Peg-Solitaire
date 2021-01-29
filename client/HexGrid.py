@@ -8,6 +8,12 @@ class HexGrid:
         self.grid = []
         self.holes = []
         self.size
+    
+    def getSize():
+        return self.size
+
+    def getHoles():
+        return self.holes
 
     def get_neighbours(self):
 
@@ -116,9 +122,9 @@ class Triangle(HexGrid):
 
 
 def example():
-    size = 3
-    t = Diamond(size, [(1,0)])
-    t.vis()
-
-example()
+    size = 4
+    t = Triangle(size, [(1,0)])
+    for row in t.grid:
+        for cell in row:
+            print(cell.getPos())
 
