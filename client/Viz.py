@@ -116,25 +116,5 @@ class Viz:
 
         """ Last step of visualising. Takes a figure and and update function to create video. """
 
-        animation = FuncAnimation(self.fig, func=self.update, frames=self.frames, interval=1000)
+        animation = FuncAnimation(self.fig, func=self.update, frames=self.frames, interval=500)
         plt.show()
-
-"""
-t = Diamond(3, [(0,0)])
-gets_jumped = Cell(1, 0)
-jumper = Cell(2, 0)
-v = Viz(t)
-
-newHx = create_Viz_Grid(t)
-
-v.step(newHx, None, None)
-
-newHx = create_Viz_Grid(t)
-
-newHx.grid[0][1].setEmpty(True)
-newHx.holes.append(newHx.grid[0][1])
-
-v.step(newHx, None, None)
-
-
-v.viz()"""

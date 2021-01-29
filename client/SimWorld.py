@@ -61,23 +61,21 @@ class SimWorld:
         
         """ Plays game of solitiare with random agent """
         
-        self.viz.step(self.board, None, None)
+        self.viz.step(create_Viz_Grid(self.board), None, None)
         A = RandomAgent()
         while True:
-
-            print("\n")
             
             """ Get all legal moves and do jump """
             hole, jumper, gets_jumped = A.getMove(self.get_all_legal_moves())
             self.solitaire_jump(hole, jumper, gets_jumped)
-
-            self.board.vis()
             
             if self.is_victory():
+                self.board.vis()
                 print("congrats")
                 self.viz.viz()
                 break
             elif len(self.get_all_legal_moves()) == 0:
+                self.board.vis()
                 print("u suck")
                 self.viz.viz()
                 break
