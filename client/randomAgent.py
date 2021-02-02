@@ -64,17 +64,13 @@ class ActorCriticAgent:
         for action in moves:
             
             a = action.stringify()
-            print((state, a), self.actor.state_action_pairs[(state, a)])
             if best == None or best[2] < self.actor.state_action_pairs[(state, a)]:
                 best = (state, action ,self.actor.state_action_pairs[(state, a)])
 
         if random.random() < e_greedy or choose_best:
             m = best[1]
-
-            print("best")
         else:
             m = random.choice(moves)
-            print("random")
         return m
 
     def set_eligibility(self, state,action):
