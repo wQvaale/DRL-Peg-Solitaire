@@ -1,5 +1,8 @@
 from HexGrid import Triangle
-from randomAgent import RandomAgent
+from randomAgent import RandomAgent, ActorCriticAgent
+from Action import Action
+import copy
+import random
 
 class SimWorld:
 
@@ -29,7 +32,7 @@ class SimWorld:
                     if hole.y == jumpee.y - y and hole.x == jumpee.x - x:
                         #if hole empty, perform jump
                         if hole.empty and not jumper.empty and not jumpee.empty:
-                            moves.append((jumper, jumpee))
+                            moves.append(Action(jumper, jumpee))
         return moves
 
 
@@ -57,7 +60,7 @@ class SimWorld:
                         self.board.holes.remove(hole)
                         self.board.holes.append(jumper)
                         self.board.holes.append(jumpee)
-                        print(jumper, " jumped over ", jumpee, " to ", hole)
+                        #print(jumper, " jumped over ", jumpee, " to ", hole)
                     else:
                         print("not legal")
                 else:
@@ -91,6 +94,32 @@ class SimWorld:
             elif not self.are_there_legal_moves():
                 print("u suck")
                 break
+    
+    def play_RL(self, agent, greed=0, vis=False, choose_best=False):
+        if vis:
+            self.board.vis()
+        if self.are_there_legal_moves():
+            while True:
+                #gets cell IDs from agent
+                prev_state = self.board.stringify()
+                action = agent.get_move(prev_state, moves=self.get_all_legal_moves(), choose_best=choose_best)
+                jumper = action.jumper
+                jumpee = action.jumpee
+
+                #plays move
+                self.solitaire_jump(jumper, jumpee)
+                if vis:
+                    self.board.vis()
+                
+                if self.is_victory():
+                    agent.update(prev_state, action, 1, self.board.stringify())
+                    agent.wins += 1
+                    break
+                elif not self.are_there_legal_moves():
+                    agent.update(prev_state, action, 0, self.board.stringify())
+                    break
+                else:
+                    agent.update(prev_state, action, 0, self.board.stringify())
 
 
     def play_solitaire_human_terminal(self):
@@ -122,6 +151,30 @@ class SimWorld:
 
     
     
+a = ActorCriticAgent()
 
-s = SimWorld()
-s.play_solitaire_random_agent()
+for i in range(1000):
+    if i % 100 == 0:
+        print(i)
+    x = random.randint(0,3)
+    y = random.randint(0, x)
+
+    s = SimWorld(size=4, holes=[(y,x)])
+    s.play_RL(a, 0.5)
+    a.flush()
+    
+aw = a.wins
+but= len(a.actor.state_action_pairs)
+
+for i in range(10) :
+    x = random.randint(0,3)
+    y = random.randint(0, x)
+
+    s = SimWorld(size=4, holes=[(2,2)])
+    s.play_RL(a, greed=0, vis=True, choose_best=True)
+    a.flush()
+
+print(a.actor.state_action_pairs)
+print(aw, a.wins-aw)
+print(but, len(a.actor.state_action_pairs))
+

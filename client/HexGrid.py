@@ -41,6 +41,17 @@ class Triangle(HexGrid):
         self.grid = cells
         self.initialize_neighbours()
 
+    def stringify(self):
+        s = ""
+        for row in self.grid:
+            for column in row:
+                if column.empty == False:
+                    s = s + "1"
+                else:
+                    s = s + "0"
+        return s
+
+
 
     def vis(self):
         for r in self.grid:
@@ -58,30 +69,36 @@ class Triangle(HexGrid):
                 try:
                     self.grid[r][c].neighbours.append(self.grid[r][c+1])
                 except Exception as e:
-                    print(e)
+                    #print(e)
+                    pass
                 try:
                     self.grid[r][c].neighbours.append(self.grid[r+1][c])
                 except:
-                    print("woops")
+                    #print("woops")
+                    pass
                 try:
                     self.grid[r][c].neighbours.append(self.grid[r+1][c+1])
                 except:
-                    print("woops")
+                   # print("woops")
+                   pass
                 try:
                     if c > 0:
                         self.grid[r][c].neighbours.append(self.grid[r][c-1])
                 except:
-                    print("woops")
+                    #print("woops")
+                    pass
                 try:
                     if r > 0:
                         self.grid[r][c].neighbours.append(self.grid[r-1][c])
                 except:
-                    print("woops")
+                    #print("woops")
+                    pass
                 try:
                     if c > 0 and r > 0:
                         self.grid[r][c].neighbours.append(self.grid[r-1][c-1])
                 except:
-                    print("woops")
+                    #print("woops")
+                    pass
 
 
 def example_use_of_triangle():
