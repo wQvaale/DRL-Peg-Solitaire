@@ -3,17 +3,28 @@ from cell import Cell
 
 class HexGrid:
 
-    def __init__(self):
+    def __init__(self, size):
 
         self.grid = []
         self.holes = []
-        self.size
+        self.size = size
     
-    def getSize():
+    def getSize(self):
         return self.size
 
-    def getHoles():
+    def getHoles(self):
         return self.holes
+
+    def stringify(self):
+        s = ""
+        for row in self.grid:
+            for column in row:
+                if column.empty == False:
+                    s = s + "1"
+                else:
+                    s = s + "0"
+        return s
+
 
     def get_neighbours(self):
 
@@ -33,34 +44,30 @@ class HexGrid:
             for c in range(len(self.grid[r])):
                 try:
                     self.grid[r][c].neighbours.append(self.grid[r][c+1])
-                except:
-                    None
+                except Exception as e:
+                    pass
                 try:
                     self.grid[r][c].neighbours.append(self.grid[r+1][c])
                 except:
-                    None
+                    pass
                 try:
                     self.grid[r][c].neighbours.append(self.grid[r+1][c+1])
                 except:
-                    None
+                   pass
                 try:
                     if c > 0:
                         self.grid[r][c].neighbours.append(self.grid[r][c-1])
                 except:
-                    None
+                    pass
                 try:
                     if r > 0:
                         self.grid[r][c].neighbours.append(self.grid[r-1][c])
                 except:
-                    None
+                    pass
                 try:
-                    if c > 0 and r > 0:
-                        self.grid[r][c].neighbours.append(self.grid[r-1][c-1])
-                except:
-                    None
+                    pass
     
     def vis(self):
-
         """ Print all nodes with empty and corresponding neighbours """
 
         for r in self.grid:

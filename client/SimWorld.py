@@ -1,6 +1,9 @@
-from HexGrid import Triangle, Diamond
-from randomAgent import RandomAgent
+import copy
+import random
+from Action import Action
 from Viz import Viz, create_Viz_Grid
+from HexGrid import Triangle, Diamond
+from randomAgent import RandomAgent, ActorCriticAgent
 
 class SimWorld:
 
@@ -79,6 +82,32 @@ class SimWorld:
                 print("u suck")
                 self.viz.viz()
                 break
+    
+    def play_RL(self, agent, greed=0, vis=False, choose_best=False):
+        if vis:
+            self.board.vis()
+        if self.are_there_legal_moves():
+            while True:
+                #gets cell IDs from agent
+                prev_state = self.board.stringify()
+                action = agent.get_move(prev_state, moves=self.get_all_legal_moves(), choose_best=choose_best)
+                jumper = action.jumper
+                jumpee = action.jumpee
+
+                #plays move
+                self.solitaire_jump(jumper, jumpee)
+                if vis:
+                    self.board.vis()
+                
+                if self.is_victory():
+                    agent.update(prev_state, action, 1, self.board.stringify())
+                    agent.wins += 1
+                    break
+                elif not self.are_there_legal_moves():
+                    agent.update(prev_state, action, 0, self.board.stringify())
+                    break
+                else:
+                    agent.update(prev_state, action, 0, self.board.stringify())
 
     def play_solitaire_human_terminal(self):
         self.board.vis()
@@ -104,6 +133,38 @@ class SimWorld:
             elif len(self.get_all_legal_moves()) == 0:
                 print("u suck")
                 break
+            
+
+def train_agent():        
+        
+    a = ActorCriticAgent()
+    for row in range(0, 5):
+        for col in range(row):
+
+            for i in range(1000):
+                if i % 100 == 0:
+                    print(i)
+            
+                s = SimWorld(size=5, holes=[(row,col)])
+                s.play_RL(a, 0.5)
+                a.flush()
+            
+    aw = a.wins
+    but= len(a.actor.state_action_pairs)
+
+    for i in range(10) :
+        x = random.randint(0,4)
+        y = random.randint(0, x)
+
+        s = SimWorld(size=5, holes=[(y,x)])
+        s.play_RL(a, greed=0, vis=True, choose_best=True)
+        a.flush()
+
+    print(a.actor.state_action_pairs)
+    print(aw, a.wins-aw)
+    print(but, len(a.actor.state_action_pairs))
+
+train_agent()
     
 
 s = SimWorld(shape="Triangle")
