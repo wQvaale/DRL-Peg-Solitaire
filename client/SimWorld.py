@@ -147,34 +147,35 @@ class SimWorld:
             elif not self.are_there_legal_moves():
                 print("u suck")
                 break
+            
+
+def train_agent():        
         
+    a = ActorCriticAgent()
 
-    
-    
-a = ActorCriticAgent()
+    for i in range(1000):
+        if i % 100 == 0:
+            print(i)
+        x = random.randint(0,3)
+        y = random.randint(0, x)
 
-for i in range(1000):
-    if i % 100 == 0:
-        print(i)
-    x = random.randint(0,3)
-    y = random.randint(0, x)
+        s = SimWorld(size=4, holes=[(y,x)])
+        s.play_RL(a, 0.5)
+        a.flush()
+        
+    aw = a.wins
+    but= len(a.actor.state_action_pairs)
 
-    s = SimWorld(size=4, holes=[(y,x)])
-    s.play_RL(a, 0.5)
-    a.flush()
-    
-aw = a.wins
-but= len(a.actor.state_action_pairs)
+    for i in range(10) :
+        x = random.randint(0,3)
+        y = random.randint(0, x)
 
-for i in range(10) :
-    x = random.randint(0,3)
-    y = random.randint(0, x)
+        s = SimWorld(size=4, holes=[(2,2)])
+        s.play_RL(a, greed=0, vis=True, choose_best=True)
+        a.flush()
 
-    s = SimWorld(size=4, holes=[(2,2)])
-    s.play_RL(a, greed=0, vis=True, choose_best=True)
-    a.flush()
+    print(a.actor.state_action_pairs)
+    print(aw, a.wins-aw)
+    print(but, len(a.actor.state_action_pairs))
 
-print(a.actor.state_action_pairs)
-print(aw, a.wins-aw)
-print(but, len(a.actor.state_action_pairs))
-
+train_agent()
