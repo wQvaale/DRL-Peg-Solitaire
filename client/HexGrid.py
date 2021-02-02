@@ -3,43 +3,17 @@ from cell import Cell
 
 class HexGrid:
 
-    def __init__(self):
+    def __init__(self, size):
 
         self.grid = []
         self.holes = []
-        self.size
-
-class Diamond(HexGrid):
-
-    def __init__(self):
-        pass
-
-
-class Triangle(HexGrid):
-
-
-    def __init__(self, size, empties=[]):
-
-        cells = []
-        self.holes = []
-        #alphabet = "abcdefghijklmnopqrstuvwxyz" #alphabetical IDSsonly work for sizes up to 6
-        ids = 0
         self.size = size
-        for i in range(size):
-            row = []
-            for j in range(0,i+1):
-                c = Cell(j,i, ids, [], False)
-                if (i,j) in empties:
-                    c.empty = True
-                    self.holes.append(c)
+    
+    def getSize(self):
+        return self.size
 
-                row.append(c)
-                ids += 1
-            cells.append(row)
-
-
-        self.grid = cells
-        self.initialize_neighbours()
+    def getHoles(self):
+        return self.holes
 
     def stringify(self):
         s = ""
@@ -52,61 +26,112 @@ class Triangle(HexGrid):
         return s
 
 
+    def get_neighbours(self):
 
-    def vis(self):
+        """ Returns list of cell neighbours"""
+        neighbours = []
         for r in self.grid:
             for x in r:
-                n = [c.cell_id for c in x.neighbours]
-
-                print(x.cell_id, x.empty,  "Neighbours: ", [c.cell_id for c in x.neighbours])
-
+                neighbours.append([c.cell_id for c in x.neighbours])
+        return neighbours
     
     def initialize_neighbours(self):
-        #pattern = [(0, 1),(1, 1),(1, 0),(0, -1),(-1, -1),(-1, 0)]
+        
+        """ For each cell, try to add a neighbour. Possible if node exist. """
+        """ pattern = [(0, 1),(1, 1),(1, 0),(0, -1),(-1, -1),(-1, 0)] """
+
         for r in range(len(self.grid)):
             for c in range(len(self.grid[r])):
-                #epic use of try
                 try:
                     self.grid[r][c].neighbours.append(self.grid[r][c+1])
                 except Exception as e:
-                    #print(e)
                     pass
                 try:
                     self.grid[r][c].neighbours.append(self.grid[r+1][c])
                 except:
-                    #print("woops")
                     pass
                 try:
                     self.grid[r][c].neighbours.append(self.grid[r+1][c+1])
                 except:
-                   # print("woops")
                    pass
                 try:
                     if c > 0:
                         self.grid[r][c].neighbours.append(self.grid[r][c-1])
                 except:
-                    #print("woops")
                     pass
                 try:
                     if r > 0:
                         self.grid[r][c].neighbours.append(self.grid[r-1][c])
                 except:
-                    #print("woops")
                     pass
                 try:
-                    if c > 0 and r > 0:
-                        self.grid[r][c].neighbours.append(self.grid[r-1][c-1])
-                except:
-                    #print("woops")
                     pass
+    
+    def vis(self):
+        """ Print all nodes with empty and corresponding neighbours """
+
+        for r in self.grid:
+            for x in r:
+                print(x.cell_id, x.empty,  "Neighbours: ", [c.cell_id for c in x.neighbours])
 
 
-def example_use_of_triangle():
+class Diamond(HexGrid):
+
+    def __init__(self, size, empties=[]):
+
+        """ Initialise Diamond shaped Hexgrid """
+        
+        self.size = size
+        self.holes = []
+
+        cells = []
+        ids = 0
+        for i in range(size):
+            row = []
+            for j in range(size):
+                c = Cell(j, i, ids, [], False)
+                if (j, i) in empties:
+                    c.empty = True
+                    self.holes.append(c)
+                row.append(c)
+                ids += 1
+            cells.append(row)
+        
+        self.grid = cells
+        self.initialize_neighbours()
+
+
+class Triangle(HexGrid):
+
+
+    def __init__(self, size, empties=[]):
+
+        """ Initialise Triangle shaped Hexgrid """
+
+        self.size = size
+        self.holes = []
+        
+        cells = []
+        ids = 0
+        for i in range(size):
+            row = []
+            for j in range(0,i+1):
+                c = Cell(j, i, ids, [], False)
+                if (j, i) in empties:
+                    c.empty = True
+                    self.holes.append(c)
+                row.append(c)
+                ids += 1
+            cells.append(row)
+
+        self.grid = cells
+        self.initialize_neighbours()
+
+
+def example():
     size = 4
-    t = Triangle(size, [(3,2)])
-    t.initialize_neighbours()
-    t.vis()
-    t.solitaire_jump((1,1),(3,1))
-    t.vis()
-
+    t = Triangle(size, [(1,0)])
+    for row in t.grid:
+        for cell in row:
+            print(cell.getPos())
 

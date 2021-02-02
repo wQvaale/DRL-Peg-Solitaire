@@ -1,98 +1,86 @@
-from HexGrid import Triangle
-from randomAgent import RandomAgent, ActorCriticAgent
-from Action import Action
 import copy
 import random
+from Action import Action
+from Viz import Viz, create_Viz_Grid
+from HexGrid import Triangle, Diamond
+from randomAgent import RandomAgent, ActorCriticAgent
 
 class SimWorld:
 
-    def __init__(self, shape="Triangle", size=4, holes=[(1,1)]):
+    def __init__(self, shape, size=4, holes=[(1,1)]):
+
         if shape == "Triangle":
             self.board = Triangle(size, holes)
+            self.num_cells = self.board.size*(self.board.size+1)/2 
 
-    def are_there_legal_moves(self):
-        for hole in self.board.holes:
-            for jumpee in hole.neighbours:
-                for jumper in jumpee.neighbours:
-                    y = jumper.y - jumpee.y
-                    x = jumper.x - jumpee.x
-                    if hole.y == jumpee.y - y and hole.x == jumpee.x - x:
-                        #if hole empty, perform jump
-                        if hole.empty and not jumper.empty and not jumpee.empty:
-                            return True
-        return False
+        elif shape == "Diamond":
+            self.board = Diamond(size, holes)
+            self.num_cells = self.board.size*self.board.size
+        
+        self.viz = Viz(self.board)
 
     def get_all_legal_moves(self):
-        moves = []
+
+        """ Returns all possible moves given board state """
+
+        legal_moves = []
+
         for hole in self.board.holes:
-            for jumpee in hole.neighbours:
-                for jumper in jumpee.neighbours:
-                    y = jumper.y - jumpee.y
-                    x = jumper.x - jumpee.x
-                    if hole.y == jumpee.y - y and hole.x == jumpee.x - x:
-                        #if hole empty, perform jump
-                        if hole.empty and not jumper.empty and not jumpee.empty:
-                            moves.append(Action(jumper, jumpee))
-        return moves
+            for gets_jumped in hole.neighbours:
+                for jumper in gets_jumped.neighbours:
+                    
+                    x_diff = jumper.x - gets_jumped.x
+                    y_diff = jumper.y - gets_jumped.y
 
+                    """ Check if jumper and gets_jumped aligned with hole """
+                    if hole.x == gets_jumped.x - x_diff and hole.y == gets_jumped.y - y_diff:
+                        if hole.empty and not jumper.empty and not gets_jumped.empty:
+                            legal_moves.append((hole, jumper, gets_jumped))
 
+        return legal_moves
 
     def is_victory(self):
-        num_cells = self.board.size*(self.board.size+1)/2
-        if len(self.board.holes) == num_cells - 1:
+        if len(self.board.holes) == self.num_cells-1:
             return True
     
-    def solitaire_jump(self, jumper, jumpee):
-        #not sure how this will interact with the rest of the system but it is something
-            #check if neighbours
-            if jumper in jumpee.neighbours:
-                #calculate hole
-                y = jumper.y - jumpee.y
-                x = jumper.x - jumpee.x
-                #if calculated hole exists - > is within the boundaries of the triangle
-                if 0 <= jumpee.y - y < self.board.size and 0 <= jumpee.x - x <= jumpee.y - y:
-                    hole = self.board.grid[jumpee.y - y][ jumpee.x - x]
-                    #if hole empty, perform jump
-                    if hole.empty and not jumper.empty and not jumpee.empty:
-                        jumper.empty = True
-                        jumpee.empty = True
-                        hole.empty = False
-                        self.board.holes.remove(hole)
-                        self.board.holes.append(jumper)
-                        self.board.holes.append(jumpee)
-                        #print(jumper, " jumped over ", jumpee, " to ", hole)
-                    else:
-                        print("not legal")
-                else:
-                    print("not legal")
-            else:
-                print("not legal")
+    def solitaire_jump(self, hole, jumper, gets_jumped):
+
+        self.viz.step(create_Viz_Grid(self.board), jumper, gets_jumped)
+
+        """ Update empty """
+        jumper.empty = True
+        gets_jumped.empty = True
+        hole.empty = False
+
+        """ Update holes """
+        self.board.holes.remove(hole)   
+        self.board.holes.append(jumper)
+        self.board.holes.append(gets_jumped)
+
+        self.viz.step(create_Viz_Grid(self.board), None, None)
+        print(jumper.getCellId(), " jumped over ", gets_jumped.getCellId(), " to ", hole.getCellId())
 
     def play_solitaire_random_agent(self):
-        A = RandomAgent()
-        self.board.vis()
-        while True:
-
         
-            #gets cell IDs from agent
-            jumper, jumpee = A.getMove(self.get_all_legal_moves())
-            #finds corresponding cells for the IDs
-            for row in range(len(self.board.grid)):
-                for col in range(row+1):
-                    if self.board.grid[row][col].cell_id == jumper:
-                        jumper = self.board.grid[row][col]
-                    if self.board.grid[row][col].cell_id == jumpee:
-                        jumpee = self.board.grid[row][col]
-
-            #plays move
-            self.solitaire_jump(jumper, jumpee)
-            self.board.vis()
+        """ Plays game of solitiare with random agent """
+        
+        self.viz.step(create_Viz_Grid(self.board), None, None)
+        A = RandomAgent()
+        while True:
+            
+            """ Get all legal moves and do jump """
+            hole, jumper, gets_jumped = A.getMove(self.get_all_legal_moves())
+            self.solitaire_jump(hole, jumper, gets_jumped)
             
             if self.is_victory():
+                self.board.vis()
                 print("congrats")
+                self.viz.viz()
                 break
-            elif not self.are_there_legal_moves():
+            elif len(self.get_all_legal_moves()) == 0:
+                self.board.vis()
                 print("u suck")
+                self.viz.viz()
                 break
     
     def play_RL(self, agent, greed=0, vis=False, choose_best=False):
@@ -121,7 +109,6 @@ class SimWorld:
                 else:
                     agent.update(prev_state, action, 0, self.board.stringify())
 
-
     def play_solitaire_human_terminal(self):
         self.board.vis()
         while True:
@@ -129,7 +116,6 @@ class SimWorld:
             inp = input("move")
             jumper = int(inp[0])
             jumpee = int(inp[1])
-        
 
             for row in range(len(self.board.grid)):
                 for col in range(row+1):
@@ -144,7 +130,7 @@ class SimWorld:
             if self.is_victory():
                 print("congrats")
                 break
-            elif not self.are_there_legal_moves():
+            elif len(self.get_all_legal_moves()) == 0:
                 print("u suck")
                 break
             
@@ -179,3 +165,7 @@ def train_agent():
     print(but, len(a.actor.state_action_pairs))
 
 train_agent()
+    
+
+s = SimWorld(shape="Triangle")
+s.play_solitaire_random_agent()
