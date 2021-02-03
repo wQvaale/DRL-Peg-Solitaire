@@ -5,9 +5,10 @@ import math
 from abc import ABC, abstractmethod
 import ast
 
+
 class BasicClientActorAbs(ABC):
 
-    def __init__(self, IP_address = None,verbose=True):
+    def __init__(self, IP_address=None, verbose=True):
         self.verbose = verbose
         if IP_address == None:
             self.IP_address = '129.241.113.109'
@@ -21,12 +22,10 @@ class BasicClientActorAbs(ABC):
         context = ssl.SSLContext(ssl.PROTOCOL_TLS_CLIENT)
         context.load_verify_locations("server.crt")
         context.verify_mode = ssl.CERT_REQUIRED
-        context.check_hostname = False # We have no hostname for the server
+        context.check_hostname = False  # We have no hostname for the server
         self.ssl_sock = context.wrap_socket(self.s)
 
         self.series_id = -1
-
-
 
     def connect_to_server(self):
         """
@@ -49,11 +48,10 @@ class BasicClientActorAbs(ABC):
         :return:
         """
         # Tell us to what address we are connecting
-        print('Attempting to connect to server using ip-address: ' +self.IP_address+':33000...')
+        print('Attempting to connect to server using ip-address: ' + self.IP_address + ':33000...')
 
         # to work. Do this either by being at the campus or by using a VPN.
         self.ssl_sock.connect((self.IP_address, 33000))
-
 
         # Print certificate
         pprint.pprint(self.ssl_sock.getpeercert())
@@ -116,7 +114,7 @@ class BasicClientActorAbs(ABC):
             # Send user response to server.
             self.ssl_sock.send(bytes(usr_in, 'utf8'))
 
-    def show_state(self,state):
+    def show_state(self, state):
         if self.verbose:
             print(state)
 
@@ -165,7 +163,7 @@ class BasicClientActorAbs(ABC):
                 num_games = ast.literal_eval(self.ssl_sock.recv(1024).decode('utf8'))
                 game_params = ast.literal_eval(self.ssl_sock.recv(1024).decode('utf8'))
                 series_player_id = [p[1] for p in player_id_map if p[0] == unique_player_id][0]
-                self.handle_series_start(unique_player_id,series_player_id,player_id_map,num_games,game_params)
+                self.handle_series_start(unique_player_id, series_player_id, player_id_map, num_games, game_params)
 
             elif state == 'Game start':
                 start_player = self.ssl_sock.recv(1024).decode('utf8')
@@ -210,7 +208,6 @@ class BasicClientActorAbs(ABC):
         :return:
         """
         pass
-
 
     @abstractmethod
     def handle_series_start(self, unique_id, series_id, player_map, num_games, game_params):
@@ -295,7 +292,3 @@ class BasicClientActorAbs(ABC):
                 col = index % size
                 empty_locs.append((row, col))
         return random.choice(empty_locs)
-
-
-
-
