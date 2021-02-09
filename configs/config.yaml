@@ -1,6 +1,4 @@
 AGENT:
-  INITIAL_PI_RANGE: !!python/tuple [1, 10]
-  DIVIDER: 100
-  LEARNING_RATE: 0.2
-  DISCOUNT: 0.9
-  DECAY: 0.1
+  LEARNING_RATE: !!python/float 0.2
+  DISCOUNT: !!python/float 0.9
+  DECAY: !!python/float 0.1

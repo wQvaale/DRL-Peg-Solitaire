@@ -1,12 +1,12 @@
 from cell import Cell
 
 
-
 class Action:
-    
-    def __init__(self, a1, a2):
-        self.jumper = a1
-        self.jumpee = a2
+
+    def __init__(self, jumper, jumpee, hole):
+        self.jumper = jumper
+        self.jumpee = jumpee
+        self.hole = hole
 
     def stringify(self):
-        return (self.jumper.cell_id, self.jumpee.cell_id)
+        return self.jumper.cell_id, self.jumpee.cell_id

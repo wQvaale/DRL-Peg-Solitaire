@@ -32,15 +32,17 @@ class ActorCriticAgent:
         self.cfg = cfg
 
     def flush(self):
-        self.actor.eligibility = {}
-        self.critic.eligibility = {}
+        self.actor.eligibility = defaultdict(lambda: 0)
+        self.critic.eligibility = defaultdict(lambda: 0)
         self.episode = []
 
     def update(self, state, action, reward, new_state):
         self.episode.append((state, action.stringify()))
         self.set_eligibility(state, action)
+        # print("CriticValue:\t",self.critic.state_value)
 
         gamma = reward + self.cfg.discount * (self.critic.state_value[new_state] - self.critic.state_value[state])
+
         for (state, action) in self.episode:
             self.critic.state_value[state] = self.critic.state_value[state] + self.cfg.learning_rate * gamma * \
                                              self.critic.eligibility[state]
@@ -55,7 +57,6 @@ class ActorCriticAgent:
         best = None
 
         for action in moves:
-
             a = action.stringify()
             if best is None or best[2] < self.actor.state_action_pairs[(state, a)]:
                 best = (state, action, self.actor.state_action_pairs[(state, a)])

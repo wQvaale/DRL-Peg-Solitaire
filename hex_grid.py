@@ -32,35 +32,6 @@ class HexGrid:
                 neighbours.append([c.cell_id for c in x.neighbours])
         return neighbours
 
-    def initialize_neighbours(self):
-        """ For each cell, try to add a neighbour. Possible if node exist. """
-        """ pattern = [(0, 1),(1, 1),(1, 0),(0, -1),(-1, -1),(-1, 0)] """
-
-        for r in range(len(self.grid)):
-            for c in range(len(self.grid[r])):
-                try:
-                    self.grid[r][c].neighbours.append(self.grid[r][c + 1])
-                except:
-                    pass
-                try:
-                    self.grid[r][c].neighbours.append(self.grid[r + 1][c])
-                except:
-                    pass
-                try:
-                    self.grid[r][c].neighbours.append(self.grid[r + 1][c + 1])
-                except:
-                    pass
-                try:
-                    if c > 0:
-                        self.grid[r][c].neighbours.append(self.grid[r][c - 1])
-                except:
-                    pass
-                try:
-                    if r > 0:
-                        self.grid[r][c].neighbours.append(self.grid[r - 1][c])
-                except:
-                    pass
-
     def vis(self):
         """ Print all nodes with empty and corresponding neighbours """
         for r in self.grid:
@@ -92,6 +63,42 @@ class Diamond(HexGrid):
         self.grid = cells
         self.initialize_neighbours()
 
+    def initialize_neighbours(self):
+        """ For each cell, try to add a neighbour. Possible if node exist. """
+        """ pattern = [(0, 1),(1, 1),(1, 0),(0, -1),(-1, -1),(-1, 0)] """
+
+        for r in range(len(self.grid)):
+            for c in range(len(self.grid[r])):
+                #epic use of try
+                try:
+                    self.grid[r][c].neighbours.append(self.grid[r][c+1])
+                except:
+                    None
+                try:
+                    self.grid[r][c].neighbours.append(self.grid[r+1][c])
+                except:
+                    None
+                try:
+                    if c > 0:
+                        self.grid[r][c].neighbours.append(self.grid[r+1][c-1])
+                except:
+                    None
+                try:
+                    if c > 0:
+                        self.grid[r][c].neighbours.append(self.grid[r][c-1])
+                except:
+                    None
+                try:
+                    if r > 0:
+                        self.grid[r][c].neighbours.append(self.grid[r-1][c])
+                except:
+                    None
+                try:
+                    if r > 0:
+                        self.grid[r][c].neighbours.append(self.grid[r-1][c+1])
+                except:
+                    None
+
 
 class Triangle(HexGrid):
 
@@ -107,7 +114,7 @@ class Triangle(HexGrid):
             row = []
             for j in range(0, i + 1):
                 c = Cell(j, i, ids, [], False)
-                if (j, i) in empties:
+                if (j,i) in empties:
                     c.empty = True
                     self.holes.append(c)
                 row.append(c)
@@ -116,3 +123,38 @@ class Triangle(HexGrid):
 
         self.grid = cells
         self.initialize_neighbours()
+
+    def initialize_neighbours(self):
+        """ For each cell, try to add a neighbour. Possible if node exist. """
+        """ pattern = [(0, 1),(1, 1),(1, 0),(0, -1),(-1, -1),(-1, 0)] """
+
+        for r in range(len(self.grid)):
+            for c in range(len(self.grid[r])):
+                #epic use of try
+                try:
+                    self.grid[r][c].neighbours.append(self.grid[r][c+1])
+                except:
+                    None
+                try:
+                    self.grid[r][c].neighbours.append(self.grid[r+1][c])
+                except:
+                    None
+                try:
+                    self.grid[r][c].neighbours.append(self.grid[r+1][c+1])
+                except:
+                    None
+                try:
+                    if c > 0:
+                        self.grid[r][c].neighbours.append(self.grid[r][c-1])
+                except:
+                    None
+                try:
+                    if r > 0:
+                        self.grid[r][c].neighbours.append(self.grid[r-1][c])
+                except:
+                    None
+                try:
+                    if c > 0 and r > 0:
+                        self.grid[r][c].neighbours.append(self.grid[r-1][c-1])
+                except:
+                    None

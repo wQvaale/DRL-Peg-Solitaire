@@ -96,11 +96,16 @@ class Viz:
         new_board = create_viz_grid(board)
         self.grid_states.append((new_board, None, None))
 
-    def step(self, board, jumper=None, gets_jumped=None):
+    def step(self, board, action):
         """ Save frame of action made by solver """
         self.frames += 1
         new_board = create_viz_grid(board)
-        self.grid_states.append((new_board, jumper, gets_jumped))
+        if action:
+            jumper = action.jumper
+            jumpee = action.jumpee
+            self.grid_states.append((new_board, jumper, jumpee))
+        else:
+            self.grid_states.append((new_board, None, None))
 
     def update(self, i):
         """ Function that is used in FuncAnimation iteration """
