@@ -17,54 +17,43 @@ class Critic:
         self.eligibility = defaultdict(lambda: 0)
 
 class NeuralCritic(torch.nn.Module):
-
-    def __init__(self, layers=4 ,sizes=[16, 8, 1]):
+    def __init__(self, layers=4, sizes=[15, 8, 1]):
+        super().__init__()
+        self.model = torch.nn.Sequential()
         self.layers = []
-        for i in range(len(sizes)-1):
-            self.layers.append(torch.rand(sizes[i],sizes[i+1]))
-        self.eligibility = defaultdict(lambda: 0)
-    
+        self.relu = torch.nn.ReLU(inplace=True)
+        self.eligibility = {name: torch.zeros(w.shape) for name, w in self.named_parameters()}
+
+        for i in range(len(sizes) - 1):
+            layer = torch.nn.Linear(sizes[i], sizes[i + 1])
+            self.model.add_module(f"{i}", layer)
+
     def forward(self, X):
-        self.z = torch.matmul(X, self.layers[0]) 
-        self.z = self.sigmoid(self.z) # activation function
-        for layer in self.layers[1:]:
-            self.z = torch.matmul(self.z, layer) 
-            self.z = self.sigmoid(self.z)
+        self.z = X
+        for layer in self.model:
+            self.z = self.relu(layer(self.z))
         return self.z
-        
-    def sigmoid(self, s):
+
+    @staticmethod
+    def sigmoid(s):
         return 1 / (1 + torch.exp(-s))
-    
-    def sigmoidPrime(self, s):
+
+    @staticmethod
+    def sigmoidPrime(s):
         # derivative of sigmoid
         return s * (1 - s)
-    
-    def backward(self, X, y, o):
-        self.o_error = y - o # error in output
-        self.o_delta = self.o_error * self.sigmoidPrime(o) # derivative of sig to error
-        self.z2_error = torch.matmul(self.o_delta, torch.t(self.W2))
-        self.z2_delta = self.z2_error * self.sigmoidPrime(self.z2)
-        self.W1 += torch.matmul(torch.t(X), self.z2_delta)
-        self.W2 += torch.matmul(torch.t(self.z2), self.o_delta)
-        
+
+
     def train(self, X, y):
         # forward + backward pass for training
         o = self.forward(X)
         self.backward(X, y, o)
-        
+
     def saveWeights(self, model):
         # we will use the PyTorch internal storage functions
         torch.save(model, "NN")
         # you can reload model with all the weights and so forth with:
         # torch.load("NN")
-        
-    def predict(self):
-        print ("Predicted data based on trained weights: ")
-        print ("Input (scaled): \n" + str(xPredicted))
-        print ("Output: \n" + str(self.forward(xPredicted)))
-
-
-
 
 
 class Actor:
@@ -102,7 +91,8 @@ class ActorCriticAgent:
                                                                  (state, action)] + self.cfg.learning_rate * gamma * \
                                                              self.actor.eligibility[(state, action)]
 
-            self.actor.eligibility[(state, action)] = self.cfg.discount * self.cfg.decay * self.actor.eligibility[(state, action)]
+            self.actor.eligibility[(state, action)] = self.cfg.discount * self.cfg.decay * self.actor.eligibility[
+                (state, action)]
 
     def get_move(self, state, moves, e_greedy=0.3, choose_best=False):
         best = None
@@ -121,7 +111,6 @@ class ActorCriticAgent:
     def set_eligibility(self, state, action):
         self.actor.eligibility[(state, action.stringify())] = 1
         self.critic.eligibility[state] = 1
-
 
 
 class NeuralAgent:
@@ -134,25 +123,46 @@ class NeuralAgent:
 
     def flush(self):
         self.actor.eligibility = defaultdict(lambda: 0)
-        self.critic.eligibility = defaultdict(lambda: 0)
+        self.critic.eligibility = {name: torch.zeros(w.shape) for name, w in self.critic.named_parameters()}
         self.episode = []
 
-    def update(self, state, action, reward, new_state):
-        self.episode.append((state, action.stringify()))
-        self.set_eligibility(state, action)
-        # print("CriticValue:\t",self.critic.state_value)
+    def update(self, current_state, action, reward, new_state):
+        self.episode.append((current_state, action.stringify()))
+        self.set_eligibility(current_state, action)
 
-        gamma = reward + self.cfg.discount * (self.critic.state_value[new_state] - self.critic.state_value[state])
+        current_state_tensor = torch.Tensor([int(b) for b in current_state])
+        new_state_tensor = torch.Tensor([int(b) for b in new_state])
+
+        gamma = reward + self.cfg.discount * (self.critic(new_state_tensor).item() - self.critic(current_state_tensor).item())
 
         for (state, action) in self.episode:
-            self.critic.state_value[state] = self.critic.state_value[state] + self.cfg.learning_rate * gamma * \
-                                             self.critic.eligibility[state]
-            self.critic.eligibility[state] = self.cfg.discount * self.cfg.decay * self.critic.eligibility[state]
+            self.update_weights(state, gamma)
+
+            # Update eligibility
+            for name, weight  in self.critic.named_parameters():
+                self.critic.eligibility[name] *= self.cfg.discount * self.cfg.decay
+
             self.actor.state_action_pairs[(state, action)] = self.actor.state_action_pairs[
                                                                  (state, action)] + self.cfg.learning_rate * gamma * \
                                                              self.actor.eligibility[(state, action)]
 
-            self.actor.eligibility[(state, action)] = self.cfg.discount * self.cfg.decay * self.actor.eligibility[(state, action)]
+            self.actor.eligibility[(state, action)] = self.cfg.discount * self.cfg.decay * self.actor.eligibility[
+                (state, action)]
+
+    def update_weights(self, state, gamma):
+        # Set gradients to zero
+        self.critic.zero_grad()
+
+        tensor_state = torch.Tensor([int(b) for b in state])
+        pred_val = self.critic(tensor_state)
+        pred_val.backward()
+        # TODO: @wQuole look into logs
+
+        for name, weight in self.critic.named_parameters():
+            self.critic.eligibility[name] += weight.grad
+            with torch.no_grad():
+                #print("self.critic.model[i]", self.critic.model[i].weight)
+                weight.add_(self.cfg.learning_rate * gamma * self.critic.eligibility[name])
 
     def get_move(self, state, moves, e_greedy=0.3, choose_best=False):
         best = None
@@ -170,4 +180,4 @@ class NeuralAgent:
 
     def set_eligibility(self, state, action):
         self.actor.eligibility[(state, action.stringify())] = 1
-        self.critic.eligibility[state] = 1
+        self.critic.eligibility = {name: torch.ones(w.shape) for name, w in self.critic.named_parameters()}
