@@ -13,18 +13,17 @@ def triangle_example():
 
 
 def train_and_test_triangle(agent):
-    for row in range(0, 5):
-        for col in range(row):
-            for i in tqdm(range(1500)):
-               
-
+    j = 0
+    for row in tqdm(range(0, 5)):
+        for col in range(row + 1):
+            for i in range(500):
                 sim_world = SimWorld(shape="Triangle", size=5, holes=[(row, col)])
                 sim_world.play_RL(agent, 0.5)
                 agent.flush()
     agent_wins = agent.wins
 
     for row in range(0, 5):
-        for col in range(row):
+        for col in range(row + 1):
             sim_world = SimWorld(shape="Triangle", size=5, holes=[(row, col)])
             sim_world.play_RL(agent, greed=0, vis=True, choose_best=True)
             agent.flush()
@@ -33,18 +32,18 @@ def train_and_test_triangle(agent):
     print(f"Agent wins:\t{agent.wins - agent_wins}")
 
 
-def train_diamond(agent, epochs=1000):
+def train_diamond(agent, epochs=500):
     holes = [(1,1), (1,2), (2,1), (2,2)]
     for hole in holes:
-        for i in range(epochs):
-            sim_world = SimWorld(shape="Diamond", size=8, holes=[hole])
+        for i in tqdm(range(epochs)):
+            sim_world = SimWorld(shape="Diamond", size=4, holes=[hole])
             sim_world.play_RL(agent, 0.5)
             agent.flush()
 
     trained_agent_wins = agent.wins
 
     for hole in holes:
-        sim_world = SimWorld(shape="Diamond", size=8, holes=[hole], viz_toggle=True)
+        sim_world = SimWorld(shape="Diamond", size=4, holes=[hole], viz_toggle=True)
         sim_world.play_RL(agent, greed=0, vis=True, choose_best=True)
         agent.flush()
 
@@ -62,7 +61,7 @@ if __name__ == '__main__':
     #sim_world.play_solitaire_random_agent()
 
     agent = NeuralAgent(cfg)
-    train_and_test_triangle(agent)
+    train_diamond(agent)
 
     # critic = NeuralCritic()
     # data = list(range(16))

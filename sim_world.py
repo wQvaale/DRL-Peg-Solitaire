@@ -103,7 +103,7 @@ class SimWorld:
                     self.board.vis()
 
                 if self.is_victory():
-                    agent.update(prev_state, action, 10, self.board.stringify())
+                    agent.update(prev_state, action, 1, self.board.stringify())
                     agent.wins += 1
                     if self.viz_toggle:
                         self.board.vis()

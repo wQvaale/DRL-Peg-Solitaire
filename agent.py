@@ -17,7 +17,7 @@ class Critic:
         self.eligibility = defaultdict(lambda: 0)
 
 class NeuralCritic(torch.nn.Module):
-    def __init__(self, layers=4, sizes=[15, 8, 1]):
+    def __init__(self, layers=4, sizes=[16, 64, 1]):
         super().__init__()
         self.model = torch.nn.Sequential()
         self.layers = []
@@ -143,7 +143,7 @@ class NeuralAgent:
                 self.critic.eligibility[name] *= self.cfg.discount * self.cfg.decay
 
             self.actor.state_action_pairs[(state, action)] = self.actor.state_action_pairs[
-                                                                 (state, action)] + self.cfg.learning_rate * gamma * \
+                                                                 (state, action)] + (self.cfg.learning_rate + 0.2) * gamma * \
                                                              self.actor.eligibility[(state, action)]
 
             self.actor.eligibility[(state, action)] = self.cfg.discount * self.cfg.decay * self.actor.eligibility[
