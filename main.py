@@ -5,64 +5,30 @@ from tqdm import tqdm
 import matplotlib.pyplot as plt
 
 
-def train_and_test_triangle(agent, size=5):
-    j = 0
-    for row in tqdm(range(0, 5)):
-        for col in range(row + 1):
-            for i in range(500):
-                sim_world = SimWorld(shape="Triangle", size=size, holes=[(row, col)])
-                sim_world.play_RL(agent, 0.5)
-                agent.flush()
-    agent_wins = agent.wins
-
-    for row in range(0, 5):
-        for col in range(row + 1):
-            sim_world = SimWorld(shape="Triangle", size=size, holes=[(row, col)], viz_toggle=1)
-            sim_world.play_RL(agent, greed=0, choose_best=True)
-            agent.flush()
-
-    print(agent.actor.state_action_pairs)
-    print(f"Agent wins:\t{agent.wins - agent_wins}")
-
-
-def train_and_test_diamond(agent, episodes=500, size=4):
-    holes = [(1, 1), (1, 2), (2, 1), (2, 2)]
-    for hole in holes:
-        for i in tqdm(range(episodes)):
-            sim_world = SimWorld(shape="Diamond", size=size, holes=[hole])
-            sim_world.play_RL(agent, 0.5)
-            agent.flush()
-
-    trained_agent_wins = agent.wins
-
-    for hole in holes:
-        sim_world = SimWorld(shape="Diamond", size=size, holes=[hole], viz_toggle=True)
-        sim_world.play_RL(agent, greed=0, choose_best=True)
-        agent.flush()
-
-    print(agent.actor.state_action_pairs)
-    print(f"Agent wins:\t{agent.wins - trained_agent_wins}")
-
-
-def train(agent, sim_world, init_holes=[(0, 0)], shape="Diamond", size=4, episodes=100):
+def train(agent, sim_world, init_holes, shape, size, episodes):
     remaining_pegs = list()
-    epsilon: float = 0.2
+    rewards = list()
+    epsilon: float = 0.3
 
-    wins = 0
     for i in tqdm(range(episodes)):
         sim_world.new_game(shape, size, init_holes)
-        e = epsilon - (epsilon*i/episodes)
-        sim_world.play_RL(agent, epsilon_greedy=e)
+        # e = epsilon - (epsilon*i/episodes)
+        epsilon *= 0.997
+        if i > 490:
+            sim_world.play_RL(agent, epsilon, choose_best=True)
+        else:
+            sim_world.play_RL(agent, epsilon, choose_best=False)
         # if i % 50 == 0:
         #     remaining_pegs.append((agent.wins - wins)/100)
         #     wins = agent.wins
-        remaining_pegs.append((sim_world.get_remaining_pegs()))
+        remaining_pegs.append(sim_world.get_remaining_pegs())
+        rewards.append(sim_world.get_reward())
         agent.flush()
     print(agent.wins)
-    return remaining_pegs, agent
+    return agent, remaining_pegs, rewards
 
 
-def test(agent, init_holes=[(0, 0)], shape="Diamond", size=4):
+def test(agent, init_holes, shape, size):
     w = agent.wins
     asd = SimWorld(shape=shape, size=size, holes=init_holes, viz_toggle=True)
     asd.play_RL(agent, choose_best=True)
@@ -73,12 +39,12 @@ def test(agent, init_holes=[(0, 0)], shape="Diamond", size=4):
 if __name__ == '__main__':
     cfg = Config("configs/config.yaml")
 
-    sim_world = SimWorld(shape="Triangle", size=4, holes=[(1,1)])
+    sim_world = SimWorld(shape="Diamond", size=4, holes=[(1, 2)])
 
     actor_critic_agent = ActorCriticAgent(cfg)
     neural_agent = NeuralAgent(cfg)
 
-    remains, trained_agent = train(neural_agent, sim_world, init_holes=[(1, 2)], shape="Diamond", size=4, episodes=1000)
+    trained_agent, remains, rewards = train(neural_agent, sim_world, init_holes=[(1, 2)], shape="Diamond", size=4, episodes=500)
 
     plt.plot(remains)
     plt.show()

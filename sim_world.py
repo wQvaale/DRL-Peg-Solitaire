@@ -70,26 +70,34 @@ class SimWorld:
     def get_remaining_pegs(self):
         return self.num_cells - len(self.board.holes)
 
+    def get_reward(self):
+        reward = 0
+        if self.is_victory():
+            reward = 1
+        elif not self.get_all_legal_moves():
+            # reward = -1 * self.get_remaining_pegs()
+            reward = 0
+        return reward
+
     def play_RL(self, agent, epsilon_greedy=0.0, choose_best=False):
-        if self.get_all_legal_moves():
-            while True:
-                # gets cell IDs from agent
-                prev_state = self.board.stringify()
-                action = agent.get_move(prev_state, e_greedy=epsilon_greedy, moves=self.get_all_legal_moves(), choose_best=choose_best)
+        while self.get_all_legal_moves():
+            # gets cell IDs from agent
+            prev_state = self.board.stringify()
+            action = agent.get_move(prev_state, e_greedy=epsilon_greedy, moves=self.get_all_legal_moves(), choose_best=choose_best)
 
-                # plays move
-                self.solitaire_jump(action)
+            # plays move
+            self.solitaire_jump(action)
+            new_state = self.board.stringify()
+            reward = self.get_reward()
 
-                if self.is_victory():
-                    agent.update(prev_state, action, 10000, self.board.stringify())
-                    agent.wins += 1
-                    if self.viz_toggle:
-                        self.viz.viz()
-                    break
-                elif not self.get_all_legal_moves():
-                    agent.update(prev_state, action, -1*self.get_remaining_pegs(), self.board.stringify())
-                    if self.viz_toggle:
-                        self.viz.viz()
-                    break
-                else:
-                    agent.update(prev_state, action, 0, self.board.stringify())
+            if self.is_victory():
+                agent.wins += 1
+                if self.viz_toggle:
+                    self.viz.viz()
+                break
+            elif not self.get_all_legal_moves():
+                if self.viz_toggle:
+                    self.viz.viz()
+                break
+
+            agent.update(prev_state, action, reward, new_state)
