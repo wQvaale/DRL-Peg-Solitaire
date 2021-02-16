@@ -1,6 +1,5 @@
 from viz import Viz
 from hex_grid import Triangle, Diamond
-from agent import RandomAgent
 from action import Action
 
 
@@ -8,6 +7,9 @@ class SimWorld:
 
     def __init__(self, shape, size=4, holes=None, viz_toggle=False):
         self.viz_toggle = viz_toggle
+        self.new_game(shape, size, holes)
+
+    def new_game(self, shape, size, holes):
         if holes is None:
             holes = [(1, 1)]
 
@@ -19,7 +21,7 @@ class SimWorld:
             self.board = Diamond(size, holes)
             self.num_cells = self.board.size * self.board.size
 
-        if viz_toggle:
+        if self.viz_toggle:
             self.viz = Viz(self.board)
 
     def get_all_legal_moves(self):
@@ -65,54 +67,28 @@ class SimWorld:
         if self.viz_toggle:
             self.viz.step(self.board, None)
 
-    def play_solitaire_random_agent(self):
+    def get_remaining_pegs(self):
+        return self.num_cells - len(self.board.holes)
 
-        """ Plays game of solitiare with random agent """
-
-        # TODO: DON't do this unless enabled / toggled
-        # self.viz.step(self.board, None, None)
-        A = RandomAgent()
-        while True:
-
-            """ Get all legal moves and do jump """
-            action = A.get_move(self.get_all_legal_moves())
-
-            self.solitaire_jump(action)
-
-            if self.is_victory():
-                self.board.vis()
-                self.viz.viz()
-                break
-            elif len(self.get_all_legal_moves()) == 0:
-                self.board.vis()
-                self.viz.viz()
-                break
-
-    def play_RL(self, agent, greed=0, vis=False, choose_best=False):
-        if vis:
-            self.board.vis()
+    def play_RL(self, agent, epsilon_greedy=0.0, choose_best=False):
         if self.get_all_legal_moves():
             while True:
                 # gets cell IDs from agent
                 prev_state = self.board.stringify()
-                action = agent.get_move(prev_state, moves=self.get_all_legal_moves(), choose_best=choose_best)
+                action = agent.get_move(prev_state, e_greedy=epsilon_greedy, moves=self.get_all_legal_moves(), choose_best=choose_best)
 
                 # plays move
                 self.solitaire_jump(action)
-                if vis:
-                    self.board.vis()
 
                 if self.is_victory():
-                    agent.update(prev_state, action, 1, self.board.stringify())
+                    agent.update(prev_state, action, 10000, self.board.stringify())
                     agent.wins += 1
                     if self.viz_toggle:
-                        self.board.vis()
                         self.viz.viz()
                     break
                 elif not self.get_all_legal_moves():
-                    agent.update(prev_state, action, 0, self.board.stringify())
+                    agent.update(prev_state, action, -1*self.get_remaining_pegs(), self.board.stringify())
                     if self.viz_toggle:
-                        self.board.vis()
                         self.viz.viz()
                     break
                 else:

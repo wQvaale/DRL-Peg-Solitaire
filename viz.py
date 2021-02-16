@@ -86,11 +86,11 @@ class Viz:
         """ Config for viz """
         self.fig, self.ax = plt.subplots()
 
-        """ Initialise Graph for viz """
+        # Initialise Graph for viz
         self.G = init_graph(board)
         self.pos = find_node_positions(type(board), board.size)
 
-        """ Frames and all their corresponding HexGrid states """
+        # Frames and all their corresponding HexGrid states
         self.frames = 1
         self.grid_states = []
         new_board = create_viz_grid(board)
@@ -114,6 +114,5 @@ class Viz:
 
     def viz(self):
         """ Last step of visualising. Takes a figure and and update function to create video. """
-
         animation = FuncAnimation(self.fig, func=self.update, frames=self.frames, interval=500)
         plt.show()

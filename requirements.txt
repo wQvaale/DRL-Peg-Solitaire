@@ -3,3 +3,4 @@ networkx==2.5
 numpy==1.20.0
 PyYAML==5.3.1
 torch==1.7.1  
+tqdm==4.56.2

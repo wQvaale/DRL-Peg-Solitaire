@@ -114,7 +114,7 @@ class Triangle(HexGrid):
             row = []
             for j in range(0, i + 1):
                 c = Cell(j, i, ids, [], False)
-                if (i, j) in empties:
+                if (j, i) in empties:
                     c.empty = True
                     self.holes.append(c)
                 row.append(c)
