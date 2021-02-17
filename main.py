@@ -40,7 +40,7 @@ def train(cfg: Config, agent):
 def test(agent, cfg: Config):
     trained_wins = agent.wins
     sim_world = SimWorld(cfg)
-    Game.play(sim_world, agent, epsilon_greedy=-1, viz_toggle=True)
+    Game.play(sim_world, agent, epsilon=-1, viz_toggle=True)
     result = agent.wins - trained_wins
     print("Agent won!" if result else "Agent lost...")
     agent.flush()
