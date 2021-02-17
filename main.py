@@ -1,7 +1,8 @@
 from tqdm import tqdm
 from config import Config
 from sim_world import SimWorld
-from utils import visualize_training_performance
+from game import Game
+from utils import visualize_training_performance, create_agent
 
 
 class PerformanceTracker:
@@ -16,19 +17,21 @@ class PerformanceTracker:
         self.wins.append(win)
 
 
-def train(cfg: Config):
-    agent = cfg.agent
+def train(cfg: Config, agent):
+    agent = agent
     epsilon = cfg.epsilon
     tracker = PerformanceTracker()
+    sim_world = SimWorld(cfg)
 
     for _ in tqdm(range(cfg.episodes)):
-        sim_world = SimWorld(cfg)
         epsilon *= cfg.epsilon_dr
-        sim_world.play_RL(agent, epsilon, choose_best=False)
+        Game.play(sim_world, agent, epsilon, viz_toggle=False)
 
         tracker.update(remaining_peg=sim_world.get_remaining_pegs(),
                        epsilon=epsilon,
                        win=agent.wins)
+
+        sim_world.reset_world()
         agent.flush()
     print(f"Agent wins during training:\t{agent.wins}")
     return agent, tracker
@@ -36,8 +39,8 @@ def train(cfg: Config):
 
 def test(agent, cfg: Config):
     trained_wins = agent.wins
-    sim_world = SimWorld(cfg, viz_toggle=True)
-    sim_world.play_RL(agent, choose_best=True)
+    sim_world = SimWorld(cfg)
+    Game.play(sim_world, agent, epsilon_greedy=-1, viz_toggle=True)
     result = agent.wins - trained_wins
     print("Agent won!" if result else "Agent lost...")
     agent.flush()
@@ -46,26 +49,13 @@ def test(agent, cfg: Config):
 if __name__ == '__main__':
     cfg = Config("configs/config.yaml")
 
-    trained_agent, tracker = train(cfg)
+    agent = create_agent(cfg)
+
+    trained_agent, tracker = train(cfg, agent)
 
     visualize_training_performance(tracker.remaining_pegs, tracker.epsilons, tracker.wins)
 
     test(trained_agent, cfg)
-
-    # 1.
-    # train_and_test_triangle(actor_critic_agent, size=5)
-    # train_and_test_triangle(neural_agent, size=5)
-
-    # 2.
-    # train_and_test_diamond(actor_critic_agent, size=4)
-    # train_and_test_diamond(neural_agent, size=4)
-
-    # 3.
-    # for i in range(4, 5):
-    #     train_and_test_triangle(actor_critic_agent, size=i)
-
-    # for i in range(3, 7):
-    #     train_and_test_diamond(actor_critic_agent, size=i)
 
     # TODO:
     """

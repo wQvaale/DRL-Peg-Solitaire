@@ -1,7 +1,9 @@
+import numpy as np
 import matplotlib.pyplot as plt
 from scipy.ndimage.filters import gaussian_filter1d
 from scipy.interpolate import make_interp_spline
-import numpy as np
+
+from agent import NeuralAgent, TableAgent
 
 
 def smooth_curve(data):
@@ -30,3 +32,12 @@ def visualize_training_performance(remaining_pegs, epsilons, wins):
     ax3.set_ylabel("# wins")
 
     plt.show()
+
+
+def create_agent(cfg):
+    if cfg.agent_type.upper() == "NEURAL":
+        return NeuralAgent(cfg)
+    elif cfg.agent_type.upper() == "TABLE":
+        return TableAgent(cfg)
+    else:
+        raise Exception("Actor type must be 'NEURAL' or 'ACTOR_CRITIC'")
