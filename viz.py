@@ -81,9 +81,10 @@ def create_viz_grid(board: HexGrid):
 
 class Viz:
 
-    def __init__(self, board: HexGrid):
+    def __init__(self, board: HexGrid, delay):
         """ Config for viz """
         self.fig, self.ax = plt.subplots()
+        self.delay = delay
 
         # Initialise Graph for viz
         self.G = init_graph(board)
@@ -113,5 +114,5 @@ class Viz:
 
     def viz(self):
         """ Last step of visualising. Takes a figure and and update function to create video. """
-        animation = FuncAnimation(self.fig, func=self.update, frames=self.frames, interval=500)
+        animation = FuncAnimation(self.fig, func=self.update, frames=self.frames, interval=self.delay)
         plt.show()

@@ -2,22 +2,10 @@ from tqdm import tqdm
 from config import Config
 from sim_world import SimWorld
 from game import Game
-from utils import visualize_training_performance, create_agent
+from utils import visualize_training_performance, create_agent, PerformanceTracker
 
 
-class PerformanceTracker:
-    def __init__(self):
-        self.remaining_pegs = list()
-        self.epsilons = list()
-        self.wins = list()
-
-    def update(self, remaining_peg, win, epsilon):
-        self.remaining_pegs.append(remaining_peg)
-        self.epsilons.append(epsilon)
-        self.wins.append(win)
-
-
-def train(cfg: Config, agent):
+def train(agent, cfg: Config):
     agent = agent
     epsilon = cfg.epsilon
     tracker = PerformanceTracker()
@@ -25,7 +13,11 @@ def train(cfg: Config, agent):
 
     for _ in tqdm(range(cfg.episodes)):
         epsilon *= cfg.epsilon_dr
-        Game.play(sim_world, agent, epsilon, viz_toggle=False)
+        Game.play(sim_world=sim_world,
+                  agent=agent,
+                  epsilon=epsilon,
+                  delay=cfg.delay,
+                  viz_toggle=False)
 
         tracker.update(remaining_peg=sim_world.get_remaining_pegs(),
                        epsilon=epsilon,
@@ -40,7 +32,13 @@ def train(cfg: Config, agent):
 def test(agent, cfg: Config):
     trained_wins = agent.wins
     sim_world = SimWorld(cfg)
-    Game.play(sim_world, agent, epsilon_greedy=-1, viz_toggle=True)
+
+    Game.play(sim_world=sim_world,
+              agent=agent,
+              epsilon=0,
+              delay=cfg.delay,
+              viz_toggle=True)
+
     result = agent.wins - trained_wins
     print("Agent won!" if result else "Agent lost...")
     agent.flush()
@@ -51,28 +49,8 @@ if __name__ == '__main__':
 
     agent = create_agent(cfg)
 
-    trained_agent, tracker = train(cfg, agent)
-
+    trained_agent, tracker = train(agent, cfg)
     visualize_training_performance(tracker.remaining_pegs, tracker.epsilons, tracker.wins)
 
     test(trained_agent, cfg)
 
-    # TODO:
-    """
-    1. Size 5 triangle with ActorCriticAgent (aka TableBased)
-    2. Size 5 triangle with NeuralAgent
-    3. Size 4 diamond with ActorCriticAgent (aka TableBased)
-    4. Size 4 diamond with NeuralAgent
-    5. All hyperparams MUST be configurable @wQuole
-    6. Triangles from size 4 up to size 8
-    7. Diamonds from size 3 up to size 6
-    8. You should be able to locate the 2 holes that are doable in size 4 diamond
-    9. We need to plot the convergence!
-    10. Rename gamma to TD_ERROR
-    11. Enable VIZ for test_triangle
-    12. Generalize train_test
-    13. reward = 10000, negative_reward = -1*len(remaining_pegs)
-    14. Dynamic EPSILON + refactor usage of it
-    15. Save a 8 diamond
-    16. @tjedor check whether you approve of the ActorCriticAgent's learning_rate
-    """

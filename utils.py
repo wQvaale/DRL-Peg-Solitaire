@@ -41,3 +41,15 @@ def create_agent(cfg):
         return TableAgent(cfg)
     else:
         raise Exception("Actor type must be 'NEURAL' or 'ACTOR_CRITIC'")
+
+
+class PerformanceTracker:
+    def __init__(self):
+        self.remaining_pegs = list()
+        self.epsilons = list()
+        self.wins = list()
+
+    def update(self, remaining_peg, win, epsilon):
+        self.remaining_pegs.append(remaining_peg)
+        self.epsilons.append(epsilon)
+        self.wins.append(win)

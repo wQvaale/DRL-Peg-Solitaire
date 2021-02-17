@@ -15,7 +15,7 @@ class NeuralCritic(torch.nn.Module):
         super().__init__()
         self.model = torch.nn.Sequential()
         self.relu = torch.nn.ReLU(inplace=True)
-        self.eligibility = {name: torch.zeros(w.shape) for name, w in self.named_parameters()}
+        self.eligibility = {name: 0 for name, w in self.named_parameters()}
 
         for i in range(len(dimensions) - 1):
             layer = torch.nn.Linear(dimensions[i], dimensions[i + 1])
@@ -107,7 +107,7 @@ class NeuralAgent:
 
     def flush(self):
         self.actor.eligibility = defaultdict(int)
-        self.critic.eligibility = {name: torch.zeros(w.shape) for name, w in self.critic.named_parameters()}
+        self.critic.eligibility = {name: 0 for name, w in self.critic.named_parameters()}
         self.episode = []
 
     def update(self, current_state, action, reward, new_state):

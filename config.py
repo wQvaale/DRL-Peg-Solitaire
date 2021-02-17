@@ -14,6 +14,8 @@ class Config:
         self.epsilon = self.defaults["EPSILON"]
         self.epsilon_dr = self.defaults["EPSILON_DR"]
         self.episodes = self.defaults["EPISODES"]
+        self.delay = self.defaults["DELAY"]
+
 
         self.agent_type = self.defaults["AGENT_TYPE"].upper()
         self.agent_config = configuration[self.agent_type]

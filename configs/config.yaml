@@ -6,9 +6,10 @@ DEFAULT:
   HOLES: [[1, 2]]
   EPSILON: !!python/float 1.0
   EPSILON_DR: !!python/float 0.99
-  AGENT_TYPE: 'Neural'
-#  AGENT_TYPE: 'Table'
+#  AGENT_TYPE: 'Neural'
+  AGENT_TYPE: 'Table'
   EPISODES: !!python/int 600
+  DELAY: !!python/int 500
 
 
 TABLE:
