@@ -1,55 +1,56 @@
-from hex_grid import Triangle
-from sim_world import SimWorld
-from agent import *
 from tqdm import tqdm
-import matplotlib.pyplot as plt
+from config import Config
+from sim_world import SimWorld
+from utils import visualize_training_performance
 
 
-def train(agent, sim_world, init_holes, shape, size, episodes):
-    remaining_pegs = list()
-    rewards = list()
-    epsilon: float = 0.3
+class PerformanceTracker:
+    def __init__(self):
+        self.remaining_pegs = list()
+        self.epsilons = list()
+        self.wins = list()
 
-    for i in tqdm(range(episodes)):
-        sim_world.new_game(shape, size, init_holes)
-        # e = epsilon - (epsilon*i/episodes)
-        epsilon *= 0.997
-        if i > 490:
-            sim_world.play_RL(agent, epsilon, choose_best=True)
-        else:
-            sim_world.play_RL(agent, epsilon, choose_best=False)
-        # if i % 50 == 0:
-        #     remaining_pegs.append((agent.wins - wins)/100)
-        #     wins = agent.wins
-        remaining_pegs.append(sim_world.get_remaining_pegs())
-        rewards.append(sim_world.get_reward())
+    def update(self, remaining_peg, win, epsilon):
+        self.remaining_pegs.append(remaining_peg)
+        self.epsilons.append(epsilon)
+        self.wins.append(win)
+
+
+def train(cfg: Config):
+    agent = cfg.agent
+    epsilon = cfg.epsilon
+    tracker = PerformanceTracker()
+
+    for _ in tqdm(range(cfg.episodes)):
+        sim_world = SimWorld(cfg)
+        epsilon *= cfg.epsilon_dr
+        sim_world.play_RL(agent, epsilon, choose_best=False)
+
+        tracker.update(remaining_peg=sim_world.get_remaining_pegs(),
+                       epsilon=epsilon,
+                       win=agent.wins)
         agent.flush()
-    print(agent.wins)
-    return agent, remaining_pegs, rewards
+    print(f"Agent wins during training:\t{agent.wins}")
+    return agent, tracker
 
 
-def test(agent, init_holes, shape, size):
-    w = agent.wins
-    asd = SimWorld(shape=shape, size=size, holes=init_holes, viz_toggle=True)
-    asd.play_RL(agent, choose_best=True)
-    print(agent.wins - w)
+def test(agent, cfg: Config):
+    trained_wins = agent.wins
+    sim_world = SimWorld(cfg, viz_toggle=True)
+    sim_world.play_RL(agent, choose_best=True)
+    result = agent.wins - trained_wins
+    print("Agent won!" if result else "Agent lost...")
     agent.flush()
 
 
 if __name__ == '__main__':
     cfg = Config("configs/config.yaml")
 
-    sim_world = SimWorld(shape="Diamond", size=4, holes=[(1, 2)])
+    trained_agent, tracker = train(cfg)
 
-    actor_critic_agent = ActorCriticAgent(cfg)
-    neural_agent = NeuralAgent(cfg)
+    visualize_training_performance(tracker.remaining_pegs, tracker.epsilons, tracker.wins)
 
-    trained_agent, remains, rewards = train(neural_agent, sim_world, init_holes=[(1, 2)], shape="Diamond", size=4, episodes=500)
-
-    plt.plot(remains)
-    plt.show()
-
-    test(trained_agent, init_holes=[(1, 2)], shape="Diamond", size=4)
+    test(trained_agent, cfg)
 
     # 1.
     # train_and_test_triangle(actor_critic_agent, size=5)
@@ -83,4 +84,5 @@ if __name__ == '__main__':
     13. reward = 10000, negative_reward = -1*len(remaining_pegs)
     14. Dynamic EPSILON + refactor usage of it
     15. Save a 8 diamond
+    16. @tjedor check whether you approve of the ActorCriticAgent's learning_rate
     """

@@ -11,7 +11,7 @@ def init_graph(board: HexGrid):
     # Add nodes to graph
     for i in range(len(board.grid)):
         for j in range(len(board.grid[i])):
-            G.add_node(int(board.grid[i][j].getCellId()))
+            G.add_node(int(board.grid[i][j].get_cell_id()))
 
     # Add edges to graph
     neighbours = board.get_neighbours()
@@ -24,7 +24,6 @@ def init_graph(board: HexGrid):
 
 def find_node_positions(board: HexGrid, size: int):
     """ Finds the node positions based on board and size """
-
     cell_pos = []
 
     if board == Triangle:
@@ -72,7 +71,7 @@ def create_viz_grid(board: HexGrid):
 
     newHoles = []
     for h in board.holes:
-        newHoles.append(h.getPos())
+        newHoles.append(h.get_pos())
 
     if type(board) == Triangle:
         return Triangle(board.size, newHoles)

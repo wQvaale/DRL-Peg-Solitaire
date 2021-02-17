@@ -8,12 +8,6 @@ class HexGrid:
         self.holes = []
         self.size = size
 
-    def get_size(self):
-        return self.size
-
-    def get_holes(self):
-        return self.holes
-
     def stringify(self):
         s = ""
         for row in self.grid:
@@ -32,16 +26,9 @@ class HexGrid:
                 neighbours.append([c.cell_id for c in x.neighbours])
         return neighbours
 
-    def vis(self):
-        """ Print all nodes with empty and corresponding neighbours """
-        for r in self.grid:
-            for x in r:
-                print(x.cell_id, x.empty, "Neighbours: ", [c.cell_id for c in x.neighbours])
-
-
 class Diamond(HexGrid):
 
-    def __init__(self, size, empties=[]):
+    def __init__(self, size, init_holes):
         """ Initialise Diamond shaped Hexgrid """
         super().__init__(size)
         self.size = size
@@ -53,7 +40,7 @@ class Diamond(HexGrid):
             row = []
             for j in range(size):
                 c = Cell(j, i, ids, [], False)
-                if (j, i) in empties:
+                if (j, i) in list(init_holes):
                     c.empty = True
                     self.holes.append(c)
                 row.append(c)
@@ -69,40 +56,40 @@ class Diamond(HexGrid):
 
         for r in range(len(self.grid)):
             for c in range(len(self.grid[r])):
-                #epic use of try
+                # epic use of try
                 try:
-                    self.grid[r][c].neighbours.append(self.grid[r][c+1])
+                    self.grid[r][c].neighbours.append(self.grid[r][c + 1])
                 except:
                     None
                 try:
-                    self.grid[r][c].neighbours.append(self.grid[r+1][c])
-                except:
-                    None
-                try:
-                    if c > 0:
-                        self.grid[r][c].neighbours.append(self.grid[r+1][c-1])
+                    self.grid[r][c].neighbours.append(self.grid[r + 1][c])
                 except:
                     None
                 try:
                     if c > 0:
-                        self.grid[r][c].neighbours.append(self.grid[r][c-1])
+                        self.grid[r][c].neighbours.append(self.grid[r + 1][c - 1])
+                except:
+                    None
+                try:
+                    if c > 0:
+                        self.grid[r][c].neighbours.append(self.grid[r][c - 1])
                 except:
                     None
                 try:
                     if r > 0:
-                        self.grid[r][c].neighbours.append(self.grid[r-1][c])
+                        self.grid[r][c].neighbours.append(self.grid[r - 1][c])
                 except:
                     None
                 try:
                     if r > 0:
-                        self.grid[r][c].neighbours.append(self.grid[r-1][c+1])
+                        self.grid[r][c].neighbours.append(self.grid[r - 1][c + 1])
                 except:
                     None
 
 
 class Triangle(HexGrid):
 
-    def __init__(self, size, empties=[]):
+    def __init__(self, size, init_holes):
         """ Initialise Triangle shaped Hexgrid """
         super().__init__(size)
         self.size = size
@@ -114,7 +101,7 @@ class Triangle(HexGrid):
             row = []
             for j in range(0, i + 1):
                 c = Cell(j, i, ids, [], False)
-                if (j, i) in empties:
+                if (j, i) in list(init_holes):
                     c.empty = True
                     self.holes.append(c)
                 row.append(c)
@@ -130,31 +117,31 @@ class Triangle(HexGrid):
 
         for r in range(len(self.grid)):
             for c in range(len(self.grid[r])):
-                #epic use of try
+                # epic use of try
                 try:
-                    self.grid[r][c].neighbours.append(self.grid[r][c+1])
+                    self.grid[r][c].neighbours.append(self.grid[r][c + 1])
                 except:
                     None
                 try:
-                    self.grid[r][c].neighbours.append(self.grid[r+1][c])
+                    self.grid[r][c].neighbours.append(self.grid[r + 1][c])
                 except:
                     None
                 try:
-                    self.grid[r][c].neighbours.append(self.grid[r+1][c+1])
+                    self.grid[r][c].neighbours.append(self.grid[r + 1][c + 1])
                 except:
                     None
                 try:
                     if c > 0:
-                        self.grid[r][c].neighbours.append(self.grid[r][c-1])
+                        self.grid[r][c].neighbours.append(self.grid[r][c - 1])
                 except:
                     None
                 try:
                     if r > 0:
-                        self.grid[r][c].neighbours.append(self.grid[r-1][c])
+                        self.grid[r][c].neighbours.append(self.grid[r - 1][c])
                 except:
                     None
                 try:
                     if c > 0 and r > 0:
-                        self.grid[r][c].neighbours.append(self.grid[r-1][c-1])
+                        self.grid[r][c].neighbours.append(self.grid[r - 1][c - 1])
                 except:
                     None

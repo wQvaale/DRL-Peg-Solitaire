@@ -1,7 +1,6 @@
-import random
-from config import Config
-from collections import defaultdict
 import torch
+import random
+from collections import defaultdict
 
 
 class Critic:
@@ -12,21 +11,21 @@ class Critic:
 
 
 class NeuralCritic(torch.nn.Module):
-    def __init__(self, sizes: list):
+    def __init__(self, dimensions: list):
         super().__init__()
         self.model = torch.nn.Sequential()
         self.relu = torch.nn.ReLU(inplace=True)
         self.eligibility = {name: torch.zeros(w.shape) for name, w in self.named_parameters()}
 
-        for i in range(len(sizes) - 1):
-            layer = torch.nn.Linear(sizes[i], sizes[i + 1])
+        for i in range(len(dimensions) - 1):
+            layer = torch.nn.Linear(dimensions[i], dimensions[i + 1])
             self.model.add_module(f"{i}", layer)
 
-    def forward(self, X):
-        self.z = X
+    def forward(self, data):
+        x = data
         for layer in self.model:
-            self.z = self.relu(layer(self.z))
-        return self.z
+            x = self.relu(layer(x))
+        return x
 
     @staticmethod
     def sigmoid(s):
@@ -36,11 +35,6 @@ class NeuralCritic(torch.nn.Module):
     def sigmoid_prime(s):
         # derivative of sigmoid
         return s * (1 - s)
-
-    # def train(self, X, y):
-    #     # forward + backward pass for training
-    #     o = self.forward(X)
-    #     self.backward(X, y, o)
 
     @staticmethod
     def save_weights(model):
@@ -57,8 +51,8 @@ class Actor:
         self.eligibility = defaultdict(int)
 
 
-class ActorCriticAgent:
-    def __init__(self, cfg: Config):
+class TableAgent:
+    def __init__(self, cfg):
         self.critic = Critic()
         self.actor = Actor()
         self.episode = []
@@ -81,12 +75,9 @@ class ActorCriticAgent:
             self.critic.state_value[state] = self.critic.state_value[state] + self.cfg.learning_rate * gamma * \
                                              self.critic.eligibility[state]
             self.critic.eligibility[state] = self.cfg.discount * self.cfg.decay * self.critic.eligibility[state]
-            self.actor.state_action_pairs[(state, action)] = self.actor.state_action_pairs[
-                                                                 (state, action)] + self.cfg.learning_rate * gamma * \
-                                                             self.actor.eligibility[(state, action)]
+            self.actor.state_action_pairs[(state, action)] += self.cfg.learning_rate * gamma * self.actor.eligibility[(state, action)]
 
-            self.actor.eligibility[(state, action)] = self.cfg.discount * self.cfg.decay * self.actor.eligibility[
-                (state, action)]
+            self.actor.eligibility[(state, action)] = self.cfg.discount * self.cfg.decay * self.actor.eligibility[(state, action)]
 
     def get_move(self, state, moves, e_greedy=0.3, choose_best=False):
         best = None
@@ -94,10 +85,10 @@ class ActorCriticAgent:
         for action in moves:
             a = action.stringify()
             candidate_action_value = self.actor.state_action_pairs[(state, a)]
-            if best is None or best[1] < candidate_action_value:
-                best = (action, candidate_action_value)
+            if best is None or best[2] < candidate_action_value:
+                best = (state, action, candidate_action_value)
 
-        if random.random() < e_greedy or choose_best:
+        if random.random() > e_greedy or choose_best:
             m = best[1]
         else:
             m = random.choice(moves)
@@ -109,12 +100,12 @@ class ActorCriticAgent:
 
 
 class NeuralAgent:
-    def __init__(self, cfg: Config):
-        self.critic = NeuralCritic(sizes=[16, 64, 1])
+    def __init__(self, cfg):
+        self.cfg = cfg
+        self.critic = NeuralCritic(dimensions=cfg.layers)
         self.actor = Actor()
         self.episode = []
         self.wins = 0
-        self.cfg = cfg
 
     def flush(self):
         self.actor.eligibility = defaultdict(int)
@@ -137,8 +128,7 @@ class NeuralAgent:
             for name, weight in self.critic.named_parameters():
                 self.critic.eligibility[name] *= self.cfg.discount * self.cfg.decay
 
-            self.actor.state_action_pairs[(state, action)] = self.actor.state_action_pairs[(state, action)] + \
-                                                             (self.cfg.learning_rate + 0.2) * gamma * self.actor.eligibility[(state, action)]
+            self.actor.state_action_pairs[(state, action)] += self.cfg.learning_rate * gamma * self.actor.eligibility[(state, action)]
 
             self.actor.eligibility[(state, action)] = self.cfg.discount * self.cfg.decay * self.actor.eligibility[(state, action)]
 
@@ -149,15 +139,13 @@ class NeuralAgent:
         tensor_state = torch.Tensor([int(b) for b in state])
         pred_val = self.critic(tensor_state)
         pred_val.backward()
-        # TODO: @wQuole look into logs
 
         for name, weight in self.critic.named_parameters():
             self.critic.eligibility[name] += weight.grad
             with torch.no_grad():
-                # print("self.critic.model[i]", self.critic.model[i].weight)
                 weight.add_(self.cfg.learning_rate * gamma * self.critic.eligibility[name])
 
-    def get_move(self, state, moves, e_greedy=0.3, choose_best=False):
+    def get_move(self, state, moves, e_greedy, choose_best=False):
         best = None
 
         for action in moves:
@@ -166,7 +154,7 @@ class NeuralAgent:
             if best is None or best[2] < candidate_action_value:
                 best = (state, action, candidate_action_value)
 
-        if random.random() < e_greedy or choose_best:
+        if random.random() > e_greedy or choose_best:
             m = best[1]
         else:
             m = random.choice(moves)
