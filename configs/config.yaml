@@ -1,4 +1,26 @@
-AGENT:
+DEFAULT:
+  SHAPE: 'Diamond'
+  SIZE: !!python/int 4
+#  HOLES: [[1,2], [2,3]]
+  HOLES: [[2, 1]]
+  EPSILON: !!python/float 1.0
+  EPSILON_DR: !!python/float 0.99
+#  AGENT_TYPE: 'Neural'
+  AGENT_TYPE: 'Table'
+  EPISODES: !!python/int 600
+
+
+ACTOR_CRITIC_AGENT:
   LEARNING_RATE: !!python/float 0.2
   DISCOUNT: !!python/float 0.9
   DECAY: !!python/float 0.1
+
+
+NEURAL_AGENT:
+  LEARNING_RATE: !!python/float 0.2
+  DISCOUNT: !!python/float 0.9
+  DECAY: !!python/float 0.1
+  LAYERS: [64, 1]
+
+
+
