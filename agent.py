@@ -38,10 +38,7 @@ class NeuralCritic(torch.nn.Module):
 
     @staticmethod
     def save_weights(model):
-        # we will use the PyTorch internal storage functions
         torch.save(model, "NN")
-        # you can reload model with all the weights and so forth with:
-        # torch.load("NN")
 
 
 class Actor:
@@ -72,10 +69,10 @@ class TableAgent:
 
         for (state, action) in self.episode:
             self.critic.state_value[state] += self.cfg.learning_rate * td_error * self.critic.eligibility[state]
-            self.critic.eligibility[state] = self.cfg.discount * self.cfg.decay * self.critic.eligibility[state]
+            self.critic.eligibility[state] *= self.cfg.discount * self.cfg.decay
 
             self.actor.state_action_pairs[(state, action)] += self.cfg.learning_rate * td_error * self.actor.eligibility[(state, action)]
-            self.actor.eligibility[(state, action)] = self.cfg.discount * self.cfg.decay * self.actor.eligibility[(state, action)]
+            self.actor.eligibility[(state, action)] *= self.cfg.discount * self.cfg.decay
 
     def get_move(self, state, moves, e_greedy):
         best = None

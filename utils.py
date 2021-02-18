@@ -1,18 +1,5 @@
-import numpy as np
 import matplotlib.pyplot as plt
-from scipy.ndimage.filters import gaussian_filter1d
-from scipy.interpolate import make_interp_spline
-
 from agent import NeuralAgent, TableAgent
-
-
-def smooth_curve(data):
-    x = np.array(range(0, 600))
-    y = np.array(data)
-    x_new = np.linspace(0, x, 50)
-    a_BSpline = make_interp_spline(x, y)
-    y_new = a_BSpline(x_new)
-    return x_new, y_new
 
 
 def visualize_training_performance(remaining_pegs, epsilons, wins):
@@ -26,9 +13,7 @@ def visualize_training_performance(remaining_pegs, epsilons, wins):
     ax2.plot(epsilons, 'r')
     ax2.set_ylabel("Epsilon")
 
-    # i, j = smooth_curve(wins)
-    y = gaussian_filter1d(wins, sigma=1)
-    ax3.plot(y, 'g')
+    ax3.plot(wins, 'g')
     ax3.set_ylabel("# wins")
 
     plt.show()
@@ -40,7 +25,7 @@ def create_agent(cfg):
     elif cfg.agent_type.upper() == "TABLE":
         return TableAgent(cfg)
     else:
-        raise Exception("Actor type must be 'NEURAL' or 'ACTOR_CRITIC'")
+        raise Exception("Actor type must be 'NEURAL' or 'TABLE'")
 
 
 class PerformanceTracker:
